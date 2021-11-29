@@ -1,0 +1,176 @@
+---
+title: "data_exploration"
+author: "Weiheng Zhang"
+date: "2021/11/28"
+output: github_document
+---
+
+```{r message = FALSE}
+library(tidyverse)
+library(lubridate)
+library(dplyr)
+library(p8105.datasets)
+library(leaflet)
+
+theme_set(theme_minimal() + theme(legend.position = "bottom"))
+
+options(
+  ggplot2.continuous.colour = "viridis",
+  ggplot2.continuous.fill = "viridis"
+)
+
+scale_colour_discrete = scale_color_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
+```
+
+
+## Data cleaning
+
+```{r message = FALSE, warning = FALSE}
+cdi =
+  read_csv("./data/cdi.csv") %>% 
+  mutate(
+    cty = as.factor(cty),
+    state = as.factor(state),
+    region = factor(region, levels = c("1", "2", "3", "4"),
+                    labels = c("Northeast", "North_Central", "South", "West")),
+    CRM_1000 = 1000*crimes/pop #每1000人中的犯罪数量(county level)
+  ) %>% 
+  relocate(CRM_1000)
+
+cdi
+```
+
+## Descriptive Statistics.
+```{r}
+summary(cdi)
+```
+
+```{r}
+sapply(cdi, function(x) sum(is.na(x)))
+```
+No missing values were found.
+
+
+
+## Identify counties with unusual crime rates.
+```{r}
+upper = quantile(cdi$CRM_1000, 0.75)
+lower = quantile(cdi$CRM_1000, 0.25)
+IQR = upper - lower
+
+cdi %>% 
+  filter(CRM_1000 > upper + 1.5*IQR,
+         CRM_1000 > lower - 1.5*IQR) %>% 
+  dplyr::select(cty, CRM_1000) %>%
+  knitr::kable(digits = 2)
+
+
+cdi %>% 
+  ggplot(aes(x = "", y = CRM_1000))+
+  geom_boxplot() + 
+  labs(title = "Counties' CRM_1000 Values",)
+```
+
+
+## Group by states and check for outliers again.
+## This part may require updates to include other variables.
+```{r}
+cdi_state = 
+  cdi %>% 
+  group_by(state) %>% 
+  summarise(state_pop = sum(pop),
+            state_crimes = sum(crimes)) %>% 
+  mutate(state_CRM_1000 = 1000*state_crimes/state_pop) %>% 
+  relocate(state_CRM_1000)
+
+cdi_state
+```
+
+```{r}
+upper = quantile(cdi_state$state_CRM_1000, 0.75)
+lower = quantile(cdi_state$state_CRM_1000, 0.25)
+IQR = upper - lower
+
+cdi_state %>% 
+  filter(state_CRM_1000 > upper + 1.5*IQR,
+         state_CRM_1000 > lower - 1.5*IQR) %>% 
+  dplyr::select(state, state_CRM_1000) %>%
+  knitr::kable(digits = 2)
+
+
+cdi_state %>% 
+  ggplot(aes(x = "", y = state_CRM_1000))+
+  geom_boxplot() + 
+  labs(title = "States' CRM_1000 Values",)
+```
+  
+Surprisingly, if we look at the CRM_1000 at state level, no outlier was found.
+
+
+
+
+## Check if counties' CRM_1000 Distribution is skewed
+```{r}
+cdi %>% 
+  ggplot(aes(x = CRM_1000)) +
+  geom_histogram(color="white", aes(y = ..density..)) + 
+  geom_density() +
+  labs(
+    title = "Histogram of CRM_1000" ,
+    x = "Crimes per 1000 people",
+    y = "Density"
+  )
+```
+  
+Seems that this is not that skewed. Do we need a log transformation?  
+
+## Perform log transformation and redraw the histogram.  
+```{r}
+cdi_trans = 
+  cdi %>% 
+  mutate(CRM_1000 = log(CRM_1000))
+
+cdi_trans %>% 
+  ggplot(aes(x = CRM_1000)) +
+  geom_histogram(color="white", aes(y = ..density..)) + 
+  geom_density() +
+  labs(
+    title = "Histogram of CRM_1000" ,
+    x = "Crimes per 1000 people",
+    y = "Density"
+  )
+```
+  
+这看上去怎么感觉还不如不搞transformation...等周一上完课再看吧。
+
+
+
+## Initial Exploration of correlation between counties' CRM_100 and all variables, With untransformed outcome (CRM_1000)
+## 好像除了poverty之外都看不出什么明显关联（捂脸）
+
+```{r}
+cdi %>% ggplot(aes(x = area, y = CRM_1000)) + geom_point()
+cdi %>% ggplot(aes(x = pop, y = CRM_1000)) + geom_point()
+cdi %>% ggplot(aes(x = pop18, y = CRM_1000)) + geom_point()
+cdi %>% ggplot(aes(x = pop65, y = CRM_1000)) + geom_point()
+cdi %>% ggplot(aes(x = docs, y = CRM_1000)) + geom_point()
+cdi %>% ggplot(aes(x = beds, y = CRM_1000)) + geom_point()
+cdi %>% ggplot(aes(x = hsgrad, y = CRM_1000)) + geom_point()
+cdi %>% ggplot(aes(x = bagrad, y = CRM_1000)) + geom_point()
+cdi %>% ggplot(aes(x = poverty, y = CRM_1000)) + geom_point()
+cdi %>% ggplot(aes(x = unemp, y = CRM_1000)) + geom_point()
+cdi %>% ggplot(aes(x = pcincome, y = CRM_1000)) + geom_point()
+cdi %>% ggplot(aes(x = totalinc, y = CRM_1000)) + geom_point()
+cdi %>% ggplot(aes(x = region, y = CRM_1000)) + geom_boxplot()
+```
+
+
+
+
+
+
+
+
+
+

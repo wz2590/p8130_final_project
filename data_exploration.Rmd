@@ -167,7 +167,7 @@ cdi %>% ggplot(aes(x = totalinc, y = CRM_1000)) + geom_point()
 cdi %>% ggplot(aes(x = region, y = CRM_1000)) + geom_boxplot()
 ```
 
-In your multiple regression model, be careful of variables that are highly correlated and be selective of the ones that you choose to include in the analysis. 
+## In your multiple regression model, be careful of variables that are highly correlated and be selective of the ones that you choose to include in the analysis. 
 
 ```{r}
 our_model = 

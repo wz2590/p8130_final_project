@@ -11,6 +11,8 @@ library(lubridate)
 library(dplyr)
 library(p8105.datasets)
 library(leaflet)
+library(mgcv)
+library(modelr)
 
 theme_set(theme_minimal() + theme(legend.position = "bottom"))
 
@@ -165,10 +167,76 @@ cdi %>% ggplot(aes(x = totalinc, y = CRM_1000)) + geom_point()
 cdi %>% ggplot(aes(x = region, y = CRM_1000)) + geom_boxplot()
 ```
 
+In your multiple regression model, be careful of variables that are highly correlated and be selective of the ones that you choose to include in the analysis. 
+
+```{r}
+our_model = 
+  lm(CRM_1000 ~ id  + cty + state + area + pop + pop18 + pop65 + docs + beds + crimes + hsgrad + bagrad + poverty + unemp + pcincome + totalinc + region, data = cdi)
+
+our_model %>% 
+  broom::tidy() %>% 
+  knitr::kable(digits = 3)
+```
+
+```{r}
+cdi %>% 
+  modelr::add_predictions(our_model) %>% 
+  modelr::add_residuals(our_model) %>% 
+  ggplot(aes(x = pred, y = resid)) + 
+  geom_point()
+  
+```
+
+```{r}
+mod_select = step(our_model, direction = 'backward')
+```
+
+```{r}
+our_new_model = lm(CRM_1000 ~ id + cty + state + area + pop + pop18 + docs + beds + crimes + hsgrad + poverty + unemp + totalinc, data = cdi)
+
+cdi %>% 
+  modelr::add_residuals(our_new_model) %>% 
+  modelr::add_predictions(our_new_model) %>% 
+  ggplot(aes(x = pred, y = resid)) +
+  geom_point()
+```
+
+Do crossvalidation 
+```{r}
+mod_df = 
+  cdi %>% 
+  select(CRM_1000, id , cty , state , area , pop , pop18 , docs , beds , crimes , hsgrad , poverty , unemp , totalinc)
+
+cv_mod = 
+  crossv_mc(mod_df, 100) %>% 
+  mutate(
+    train = map(train, as_tibble),
+    test = map(test, as_tibble))
+
+cv_mod = 
+  cv_mod %>% 
+  mutate(
+    model_1  = map(train, ~lm(CRM_1000 ~ id + area + pop + pop18 + docs + beds + crimes + hsgrad + poverty + unemp + totalinc, data = .x))) %>%
+  mutate(
+    rmse_model_1 = map2_dbl(model_1, test, ~rmse(model = .x, data = .y)))
 
 
+```
 
+Plot the prediction error distribution for each model.
 
+```{r}
+cv_mod %>% 
+  select(starts_with("rmse")) %>% 
+  pivot_longer(
+    everything(),
+    names_to = "model", 
+    values_to = "rmse",
+    names_prefix = "rmse_") %>% 
+  mutate(model = fct_inorder(model)) %>% 
+  ggplot(aes(x = model, y = rmse)) + 
+  geom_violin()
+```
 
 
 

@@ -9,6 +9,7 @@ library(lubridate)
 library(dplyr)
 library(p8105.datasets)
 library(leaflet)
+library(MASS)
 
 theme_set(theme_minimal() + theme(legend.position = "bottom"))
 
@@ -146,8 +147,6 @@ cdi %>%
 
 ## Group by states and check for outliers again.
 
-## This part may require updates to include other variables.
-
 ``` r
 cdi_state = 
   cdi %>% 
@@ -202,53 +201,138 @@ cdi_state %>%
 Surprisingly, if we look at the CRM\_1000 at state level, no outlier was
 found.
 
-## Check if counties’ CRM\_1000 Distribution is skewed
+## Check for transformation
 
 ``` r
-cdi %>% 
-  ggplot(aes(x = CRM_1000)) +
-  geom_histogram(color="white", aes(y = ..density..)) + 
-  geom_density() +
-  labs(
-    title = "Histogram of CRM_1000" ,
-    x = "Crimes per 1000 people",
-    y = "Density"
-  )
+# fit multivariate model
+mult.fit1 = lm(CRM_1000 ~ poverty + region + state + area + pop + pop18 + pop65 + hsgrad + bagrad + unemp + pcincome + totalinc, data = cdi) 
+
+# check diagnostics
+plot(mult.fit1)
 ```
 
-    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+    ## Warning: not plotting observations with leverage one:
+    ##   73, 232, 233, 339, 356, 388, 429
 
-![](data_exploration_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
-
-Seems that this is not that skewed. Do we need a log transformation?
-
-## Perform log transformation and redraw the histogram.
+![](data_exploration_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->![](data_exploration_files/figure-gfm/unnamed-chunk-8-2.png)<!-- -->![](data_exploration_files/figure-gfm/unnamed-chunk-8-3.png)<!-- -->![](data_exploration_files/figure-gfm/unnamed-chunk-8-4.png)<!-- -->
 
 ``` r
-cdi_trans = 
+boxcox(mult.fit1)
+```
+
+![](data_exploration_files/figure-gfm/unnamed-chunk-8-5.png)<!-- -->
+
+## a = 1/2. Perform sqrt transformation.
+
+``` r
+cdi = 
   cdi %>% 
-  mutate(CRM_1000 = log(CRM_1000))
+  mutate(sqrt_CRM_1000 = sqrt(CRM_1000))
 
-cdi_trans %>% 
-  ggplot(aes(x = CRM_1000)) +
-  geom_histogram(color="white", aes(y = ..density..)) + 
-  geom_density() +
-  labs(
-    title = "Histogram of CRM_1000" ,
-    x = "Crimes per 1000 people",
-    y = "Density"
-  )
+mult.fit2 = lm(sqrt_CRM_1000 ~ poverty + region + state + area + pop + pop18 + pop65 + hsgrad + bagrad + unemp + pcincome + totalinc, data = cdi) 
+
+# check diagnostics
+summary(mult.fit2)
 ```
 
-    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+    ## 
+    ## Call:
+    ## lm(formula = sqrt_CRM_1000 ~ poverty + region + state + area + 
+    ##     pop + pop18 + pop65 + hsgrad + bagrad + unemp + pcincome + 
+    ##     totalinc, data = cdi)
+    ## 
+    ## Residuals:
+    ##     Min      1Q  Median      3Q     Max 
+    ## -3.7879 -0.5955  0.0000  0.6568  5.1472 
+    ## 
+    ## Coefficients: (3 not defined because of singularities)
+    ##                       Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)         -5.089e+00  2.318e+00  -2.196  0.02872 *  
+    ## poverty              2.003e-01  2.515e-02   7.964 1.93e-14 ***
+    ## regionNorth_Central  9.644e-01  1.193e+00   0.809  0.41930    
+    ## regionSouth          1.281e+00  1.221e+00   1.049  0.29502    
+    ## regionWest           1.936e+00  1.201e+00   1.612  0.10777    
+    ## stateAR              1.722e+00  9.080e-01   1.897  0.05865 .  
+    ## stateAZ              2.034e-01  6.875e-01   0.296  0.76749    
+    ## stateCA             -8.261e-01  4.383e-01  -1.885  0.06023 .  
+    ## stateCO              1.019e-01  5.266e-01   0.194  0.84664    
+    ## stateCT             -5.296e-01  1.213e+00  -0.436  0.66273    
+    ## stateDC              6.494e-01  1.231e+00   0.527  0.59820    
+    ## stateDE              1.546e+00  1.392e+00   1.111  0.26731    
+    ## stateFL              8.421e-01  5.195e-01   1.621  0.10584    
+    ## stateGA              1.073e+00  5.763e-01   1.862  0.06340 .  
+    ## stateHI              3.911e-01  7.695e-01   0.508  0.61154    
+    ## stateID             -5.659e-01  1.189e+00  -0.476  0.63428    
+    ## stateIL             -1.370e-01  4.447e-01  -0.308  0.75823    
+    ## stateIN             -7.794e-01  4.596e-01  -1.696  0.09072 .  
+    ## stateKS              1.803e+00  6.657e-01   2.709  0.00705 ** 
+    ## stateKY             -4.483e-01  7.832e-01  -0.572  0.56740    
+    ## stateLA             -2.425e-01  5.856e-01  -0.414  0.67906    
+    ## stateMA             -6.593e-01  1.201e+00  -0.549  0.58333    
+    ## stateMD             -8.697e-02  5.783e-01  -0.150  0.88054    
+    ## stateME              6.367e-01  1.248e+00   0.510  0.61012    
+    ## stateMI              2.620e-01  4.540e-01   0.577  0.56423    
+    ## stateMN              6.923e-04  5.550e-01   0.001  0.99901    
+    ## stateMO              5.475e-01  5.292e-01   1.035  0.30149    
+    ## stateMS              5.294e-02  7.897e-01   0.067  0.94659    
+    ## stateMT             -1.424e+00  1.189e+00  -1.197  0.23201    
+    ## stateNC              3.934e-01  5.129e-01   0.767  0.44359    
+    ## stateND             -7.976e-01  1.194e+00  -0.668  0.50456    
+    ## stateNE              6.944e-01  7.492e-01   0.927  0.35461    
+    ## stateNH             -7.872e-02  1.272e+00  -0.062  0.95068    
+    ## stateNJ              3.601e-01  1.182e+00   0.305  0.76077    
+    ## stateNM              2.491e-01  8.947e-01   0.278  0.78084    
+    ## stateNV              6.295e-01  9.371e-01   0.672  0.50214    
+    ## stateNY              4.634e-01  1.166e+00   0.397  0.69123    
+    ## stateOH             -9.957e-01  4.140e-01  -2.405  0.01665 *  
+    ## stateOK              9.407e-01  7.215e-01   1.304  0.19306    
+    ## stateOR              1.552e-01  5.876e-01   0.264  0.79178    
+    ## statePA             -7.065e-01  1.164e+00  -0.607  0.54406    
+    ## stateRI              7.092e-01  1.318e+00   0.538  0.59082    
+    ## stateSC              1.065e+00  5.506e-01   1.934  0.05389 .  
+    ## stateSD              8.745e-02  1.186e+00   0.074  0.94125    
+    ## stateTN              2.359e-01  5.877e-01   0.401  0.68836    
+    ## stateTX              5.426e-01  4.834e-01   1.122  0.26238    
+    ## stateUT              2.055e-01  6.876e-01   0.299  0.76516    
+    ## stateVA             -8.078e-02  5.925e-01  -0.136  0.89162    
+    ## stateVT                     NA         NA      NA       NA    
+    ## stateWA                     NA         NA      NA       NA    
+    ## stateWI                     NA         NA      NA       NA    
+    ## stateWV             -6.430e-01  1.213e+00  -0.530  0.59628    
+    ## area                -1.313e-04  5.024e-05  -2.613  0.00934 ** 
+    ## pop                  6.570e-06  8.134e-07   8.078 8.72e-15 ***
+    ## pop18                1.266e-01  2.284e-02   5.541 5.62e-08 ***
+    ## pop65                5.179e-02  2.266e-02   2.286  0.02281 *  
+    ## hsgrad               9.689e-03  1.995e-02   0.486  0.62753    
+    ## bagrad              -5.122e-02  1.950e-02  -2.626  0.00898 ** 
+    ## unemp               -1.537e-03  4.382e-02  -0.035  0.97204    
+    ## pcincome             3.019e-04  3.759e-05   8.032 1.20e-14 ***
+    ## totalinc            -2.944e-04  3.923e-05  -7.504 4.40e-13 ***
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 1.13 on 382 degrees of freedom
+    ## Multiple R-squared:  0.6318, Adjusted R-squared:  0.5768 
+    ## F-statistic:  11.5 on 57 and 382 DF,  p-value: < 2.2e-16
 
-![](data_exploration_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+``` r
+plot(mult.fit2)
+```
 
-这看上去怎么感觉还不如不搞transformation…等周一上完课再看吧。
+    ## Warning: not plotting observations with leverage one:
+    ##   73, 232, 233, 339, 356, 388, 429
+
+![](data_exploration_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->![](data_exploration_files/figure-gfm/unnamed-chunk-9-2.png)<!-- -->![](data_exploration_files/figure-gfm/unnamed-chunk-9-3.png)<!-- -->![](data_exploration_files/figure-gfm/unnamed-chunk-9-4.png)<!-- -->
+
+``` r
+boxcox(mult.fit2) 
+```
+
+![](data_exploration_files/figure-gfm/unnamed-chunk-9-5.png)<!-- -->
 
 ## Initial Exploration of correlation between counties’ CRM\_100 and all variables, With untransformed outcome (CRM\_1000)
 
-## 好像除了poverty之外都看不出什么明显关联（捂脸）
+## 好像除了poverty, region和state之外都看不出什么明显关联（捂脸）
 
 ``` r
 cdi %>% ggplot(aes(x = area, y = CRM_1000)) + geom_point()
@@ -327,3 +411,9 @@ cdi %>% ggplot(aes(x = region, y = CRM_1000)) + geom_boxplot()
 ```
 
 ![](data_exploration_files/figure-gfm/unnamed-chunk-10-13.png)<!-- -->
+
+``` r
+cdi %>% ggplot(aes(y = state, x = CRM_1000)) + geom_boxplot()
+```
+
+![](data_exploration_files/figure-gfm/unnamed-chunk-10-14.png)<!-- -->

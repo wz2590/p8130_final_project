@@ -11,13 +11,10 @@ library(lubridate)
 library(dplyr)
 library(p8105.datasets)
 library(leaflet)
-<<<<<<< HEAD
 library(mgcv)
 library(modelr)
 library(corrplot)
-=======
 library(MASS)
->>>>>>> b28dc3f3d752e02a07ecff69018d992e62003d37
 
 theme_set(theme_minimal() + theme(legend.position = "bottom"))
 
@@ -174,14 +171,18 @@ cdi %>% ggplot(aes(y = state, x = CRM_1000)) + geom_boxplot()
 
 ```{r}
 new_cdi = 
-  cdi %>% 
-  dplyr::select(-state, -cty, -region)
+  cdi %>%
+  mutate(
+    state = as.numeric(state),
+    region = as.numeric(region)
+  ) %>% 
+  dplyr::select(-cty, -CRM_1000)
 
 pairs(new_cdi)
 
 corrplot(cor(new_cdi), type = "upper", diag = FALSE)
 
-mult.fit = lm(CRM_1000 ~ ., data = new_cdi)
+mult.fit = lm(sqrt_CRM_1000 ~ ., data = new_cdi)
 summary(mult.fit)
 ```
 
@@ -206,7 +207,7 @@ mod_select = step(mult.fit, direction = 'backward')
 ```
 
 ```{r}
-our_new_model = lm(CRM_1000 ~ id + pop + pop18 + docs + crimes + poverty + unemp + pcincome, data = new_cdi)
+our_new_model = lm(sqrt_CRM_1000 ~ id + area + pop + pop18 + pop65 + beds + crimes + bagrad + poverty + pcincome + region, data = new_cdi)
 
 new_cdi %>% 
   modelr::add_residuals(our_new_model) %>% 
@@ -219,7 +220,7 @@ Do crossvalidation
 ```{r}
 mod_df = 
   new_cdi %>% 
-  select(CRM_1000, id , pop , pop18 , docs , crimes , poverty , unemp , pcincome)
+  select(sqrt_CRM_1000, id, area, pop, pop18, pop65, beds, crimes, bagrad, poverty, pcincome, region)
 
 cv_mod = 
   crossv_mc(mod_df, 100) %>% 
@@ -230,7 +231,7 @@ cv_mod =
 cv_mod = 
   cv_mod %>% 
   mutate(
-    model_1  = map(train, ~lm(CRM_1000 ~ id + pop + pop18 + docs + crimes + poverty + unemp + pcincome, data = .x))) %>%
+    model_1  = map(train, ~lm(sqrt_CRM_1000 ~ id + area + pop + pop18 + pop65 + beds + crimes + bagrad + poverty + pcincome + region, data = .x))) %>%
   mutate(
     rmse_model_1 = map2_dbl(model_1, test, ~rmse(model = .x, data = .y)))
 

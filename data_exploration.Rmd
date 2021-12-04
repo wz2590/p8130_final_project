@@ -16,6 +16,7 @@ library(modelr)
 library(corrplot)
 library(MASS)
 
+
 theme_set(theme_minimal() + theme(legend.position = "bottom"))
 
 options(
@@ -143,6 +144,29 @@ boxcox(mult.fit2)
 ```
 
 
+## Checking to Outliers and Influential Points
+
+```{r}
+# residuals vs leverage plot
+plot(mult.fit1, which = 4)
+
+# remove influential points
+cdiOut = cdi[-c(1, 6),]
+
+# plot with and without influential points
+plot(cdi$poverty, cdi$CRM_1000)
+plot(cdiOut$poverty, cdiOut$CRM_1000)
+
+# fit model with and without influential points
+with = lm(CRM_1000 ~ poverty + region + state + area + pop + pop18 + pop65 + hsgrad + bagrad + unemp + pcincome + totalinc, data = cdi) 
+
+without = lm(CRM_1000 ~ poverty + region + state + area + pop + pop18 + pop65 + hsgrad + bagrad + unemp + pcincome + totalinc, data = cdiOut) 
+
+summary(with); summary(without)
+
+# check without diagnostics
+plot(without)
+```
 
 
 

@@ -15,6 +15,7 @@ library(mgcv)
 library(modelr)
 library(corrplot)
 library(MASS)
+library(performance)
 
 
 theme_set(theme_minimal() + theme(legend.position = "bottom"))
@@ -200,14 +201,17 @@ new_cdi =
     state = as.numeric(state),
     region = as.numeric(region)
   ) %>% 
-  dplyr::select(-cty, -CRM_1000)
+  dplyr::select(-id, -cty, -CRM_1000)
 
 pairs(new_cdi)
+
+cor(new_cdi)
 
 corrplot(cor(new_cdi), type = "upper", diag = FALSE)
 
 mult.fit = lm(new_cdi$sqrt_CRM_1000 ~ ., data = new_cdi)
 summary(mult.fit)
+check_collinearity(mult.fit)
 ```
 
 

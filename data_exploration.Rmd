@@ -206,7 +206,7 @@ pairs(new_cdi)
 
 corrplot(cor(new_cdi), type = "upper", diag = FALSE)
 
-mult.fit = lm(sqrt_CRM_1000 ~ ., data = new_cdi)
+mult.fit = lm(new_cdi$sqrt_CRM_1000 ~ ., data = new_cdi)
 summary(mult.fit)
 ```
 
@@ -244,7 +244,7 @@ Do crossvalidation
 ```{r}
 mod_df = 
   new_cdi %>% 
-  select(sqrt_CRM_1000, id, area, pop, pop18, pop65, beds, crimes, bagrad, poverty, pcincome, region)
+  dplyr::select(sqrt_CRM_1000, id, area, pop, pop18, pop65, beds, crimes, bagrad, poverty, pcincome, region)
 
 cv_mod = 
   crossv_mc(mod_df, 100) %>% 
@@ -266,7 +266,7 @@ Plot the prediction error distribution for each model.
 
 ```{r}
 cv_mod %>% 
-  select(starts_with("rmse")) %>% 
+  dplyr::select(starts_with("rmse")) %>% 
   pivot_longer(
     everything(),
     names_to = "model", 

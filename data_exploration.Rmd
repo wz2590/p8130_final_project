@@ -12,6 +12,7 @@ library(dplyr)
 library(p8105.datasets)
 library(leaflet)
 
+
 theme_set(theme_minimal() + theme(legend.position = "bottom"))
 
 options(
@@ -48,6 +49,8 @@ summary(cdi)
 
 ```{r}
 sapply(cdi, function(x) sum(is.na(x)))
+
+map(cdi, ~sum(is.na(.)))
 ```
 No missing values were found.
 

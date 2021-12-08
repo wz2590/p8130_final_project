@@ -11,6 +11,11 @@ library(lubridate)
 library(dplyr)
 library(p8105.datasets)
 library(leaflet)
+library(mgcv)
+library(modelr)
+library(corrplot)
+library(MASS)
+
 
 
 theme_set(theme_minimal() + theme(legend.position = "bottom"))
@@ -77,7 +82,6 @@ cdi %>%
 
 
 ## Group by states and check for outliers again.
-## This part may require updates to include other variables.
 ```{r}
 cdi_state = 
   cdi %>% 
@@ -113,44 +117,65 @@ Surprisingly, if we look at the CRM_1000 at state level, no outlier was found.
 
 
 
-## Check if counties' CRM_1000 Distribution is skewed
-```{r}
-cdi %>% 
-  ggplot(aes(x = CRM_1000)) +
-  geom_histogram(color="white", aes(y = ..density..)) + 
-  geom_density() +
-  labs(
-    title = "Histogram of CRM_1000" ,
-    x = "Crimes per 1000 people",
-    y = "Density"
-  )
-```
-  
-Seems that this is not that skewed. Do we need a log transformation?  
 
-## Perform log transformation and redraw the histogram.  
+
+
+## Check for transformation
+
 ```{r}
-cdi_trans = 
+# fit multivariate model
+mult.fit1 = lm(CRM_1000 ~ poverty + region + state + area + pop + pop18 + pop65 + hsgrad + bagrad + unemp + pcincome + totalinc, data = cdi) 
+
+# check diagnostics
+plot(mult.fit1)
+boxcox(mult.fit1)
+```
+
+## a = 1/2. Perform sqrt transformation.
+
+```{r}
+cdi = 
   cdi %>% 
-  mutate(CRM_1000 = log(CRM_1000))
+  mutate(sqrt_CRM_1000 = sqrt(CRM_1000))
 
-cdi_trans %>% 
-  ggplot(aes(x = CRM_1000)) +
-  geom_histogram(color="white", aes(y = ..density..)) + 
-  geom_density() +
-  labs(
-    title = "Histogram of CRM_1000" ,
-    x = "Crimes per 1000 people",
-    y = "Density"
-  )
+mult.fit2 = lm(sqrt_CRM_1000 ~ poverty + region + state + area + pop + pop18 + pop65 + hsgrad + bagrad + unemp + pcincome + totalinc, data = cdi) 
+
+# check diagnostics
+summary(mult.fit2)
+plot(mult.fit2)
+boxcox(mult.fit2) 
 ```
-  
-这看上去怎么感觉还不如不搞transformation...等周一上完课再看吧。
+
+
+## Checking to Outliers and Influential Points
+
+```{r}
+# residuals vs leverage plot
+plot(mult.fit1, which = 4)
+
+# remove influential points
+cdiOut = cdi[-c(1, 6),]
+
+# plot with and without influential points
+plot(cdi$poverty, cdi$CRM_1000)
+plot(cdiOut$poverty, cdiOut$CRM_1000)
+
+# fit model with and without influential points
+with = lm(CRM_1000 ~ poverty + region + state + area + pop + pop18 + pop65 + hsgrad + bagrad + unemp + pcincome + totalinc, data = cdi) 
+
+without = lm(CRM_1000 ~ poverty + region + state + area + pop + pop18 + pop65 + hsgrad + bagrad + unemp + pcincome + totalinc, data = cdiOut) 
+
+summary(with); summary(without)
+
+# check without diagnostics
+plot(without)
+```
+
 
 
 
 ## Initial Exploration of correlation between counties' CRM_100 and all variables, With untransformed outcome (CRM_1000)
-## 好像除了poverty之外都看不出什么明显关联（捂脸）
+## 好像除了poverty, region和state之外都看不出什么明显关联（捂脸）
 
 ```{r}
 cdi %>% ggplot(aes(x = area, y = CRM_1000)) + geom_point()
@@ -166,12 +191,94 @@ cdi %>% ggplot(aes(x = unemp, y = CRM_1000)) + geom_point()
 cdi %>% ggplot(aes(x = pcincome, y = CRM_1000)) + geom_point()
 cdi %>% ggplot(aes(x = totalinc, y = CRM_1000)) + geom_point()
 cdi %>% ggplot(aes(x = region, y = CRM_1000)) + geom_boxplot()
+cdi %>% ggplot(aes(y = state, x = CRM_1000)) + geom_boxplot()
+```
+
+## In your multiple regression model, be careful of variables that are highly correlated and be selective of the ones that you choose to include in the analysis. 
+
+```{r}
+new_cdi = 
+  cdi %>%
+  mutate(
+    state = as.numeric(state),
+    region = as.numeric(region)
+  ) %>% 
+  dplyr::select(-cty, -CRM_1000)
+
+pairs(new_cdi)
+
+corrplot(cor(new_cdi), type = "upper", diag = FALSE)
+
+mult.fit = lm(new_cdi$sqrt_CRM_1000 ~ ., data = new_cdi)
+summary(mult.fit)
 ```
 
 
+```{r}
+mult.fit %>% 
+  broom::tidy() %>% 
+  knitr::kable(digits = 3)
+```
+
+```{r}
+new_cdi %>% 
+  modelr::add_predictions(mult.fit) %>% 
+  modelr::add_residuals(mult.fit) %>% 
+  ggplot(aes(x = pred, y = resid)) + 
+  geom_point()
+  
+```
+
+```{r}
+mod_select = step(mult.fit, direction = 'backward')
+```
+
+```{r}
+our_new_model = lm(sqrt_CRM_1000 ~ id + area + pop + pop18 + pop65 + beds + crimes + bagrad + poverty + pcincome + region, data = new_cdi)
+
+new_cdi %>% 
+  modelr::add_residuals(our_new_model) %>% 
+  modelr::add_predictions(our_new_model) %>% 
+  ggplot(aes(x = pred, y = resid)) +
+  geom_point()
+```
+
+Do crossvalidation 
+```{r}
+mod_df = 
+  new_cdi %>% 
+  dplyr::select(sqrt_CRM_1000, id, area, pop, pop18, pop65, beds, crimes, bagrad, poverty, pcincome, region)
+
+cv_mod = 
+  crossv_mc(mod_df, 100) %>% 
+  mutate(
+    train = map(train, as_tibble),
+    test = map(test, as_tibble))
+
+cv_mod = 
+  cv_mod %>% 
+  mutate(
+    model_1  = map(train, ~lm(sqrt_CRM_1000 ~ id + area + pop + pop18 + pop65 + beds + crimes + bagrad + poverty + pcincome + region, data = .x))) %>%
+  mutate(
+    rmse_model_1 = map2_dbl(model_1, test, ~rmse(model = .x, data = .y)))
 
 
+```
 
+Plot the prediction error distribution for each model.
+
+```{r}
+cv_mod %>% 
+  dplyr::select(starts_with("rmse")) %>% 
+  pivot_longer(
+    everything(),
+    names_to = "model", 
+    values_to = "rmse",
+    names_prefix = "rmse_") %>% 
+  mutate(model = fct_inorder(model)) %>% 
+  ggplot(aes(x = model, y = rmse)) + 
+  geom_violin()
+```
 
 
 

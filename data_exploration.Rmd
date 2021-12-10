@@ -208,8 +208,11 @@ pairs(new_cdi)
 cor(new_cdi)
 
 corrplot(cor(new_cdi), type = "upper", diag = FALSE)
+```
 
-mult.fit = lm(new_cdi$sqrt_CRM_1000 ~ ., data = new_cdi)
+
+```{r}
+mult.fit = lm(sqrt_CRM_1000 ~ ., data = new_cdi)
 summary(mult.fit)
 check_collinearity(mult.fit)
 ```
@@ -232,10 +235,12 @@ new_cdi %>%
 
 ```{r}
 mod_select = step(mult.fit, direction = 'backward')
+mod_select_1 = step(mult.fit, direction = 'forward')
 ```
 
 ```{r}
-our_new_model = lm(sqrt_CRM_1000 ~ id + area + pop + pop18 + pop65 + beds + crimes + bagrad + poverty + pcincome + region, data = new_cdi)
+our_new_model = lm(sqrt_CRM_1000 ~ area + pop18 + pop65 + beds + crimes + bagrad + 
+    poverty + pcincome + totalinc + region, data = new_cdi)
 
 new_cdi %>% 
   modelr::add_residuals(our_new_model) %>% 
@@ -248,7 +253,8 @@ Do crossvalidation
 ```{r}
 mod_df = 
   new_cdi %>% 
-  dplyr::select(sqrt_CRM_1000, id, area, pop, pop18, pop65, beds, crimes, bagrad, poverty, pcincome, region)
+  dplyr::select(sqrt_CRM_1000, area , pop18 , pop65 , beds , crimes , bagrad , 
+    poverty , pcincome , totalinc , region)
 
 cv_mod = 
   crossv_mc(mod_df, 100) %>% 
@@ -259,9 +265,10 @@ cv_mod =
 cv_mod = 
   cv_mod %>% 
   mutate(
-    model_1  = map(train, ~lm(sqrt_CRM_1000 ~ id + area + pop + pop18 + pop65 + beds + crimes + bagrad + poverty + pcincome + region, data = .x))) %>%
+    model_1  = map(train, ~lm(sqrt_CRM_1000 ~ area + pop18 + pop65 + beds + crimes + bagrad + 
+    poverty + pcincome + totalinc + region, data = .x))) %>%
   mutate(
-    rmse_model_1 = map2_dbl(model_1, test, ~rmse(model = .x, data = .y)))
+    rmse_model_1 = map2_dbl(model_1, test, ~rmse(model = .x)))
 
 
 ```

@@ -41,7 +41,11 @@ cdi =
     state = as.factor(state),
     region = factor(region, levels = c("1", "2", "3", "4"),
                     labels = c("Northeast", "North_Central", "South", "West")),
-    CRM_1000 = 1000*crimes/pop) %>% 
+    CRM_1000 = 1000*crimes/pop,
+    pop_den = pop/area,
+    pdocs = docs/pop,
+    pbeds = beds/pop) %>%
+  dplyr::select(-id, -area, -beds, -docs) %>%  # pop and crime will be removed after detecting state outliers.
   relocate(CRM_1000)
 
 cdi
@@ -64,18 +68,17 @@ No missing values were found.
 ```{r, dpi = 300}
 par(mfrow = c(2, 3))
 boxplot(cdi$CRM_1000, main = 'Crime Rate per 1000 people') # an obvious outlier around 300
-boxplot(cdi$area, main = 'Land Area')
-boxplot(cdi$pop,main = 'Total Population')
+boxplot(cdi$pop_den,main = 'Total Population')
 boxplot(cdi$pop18, main = 'Percent of Population Aged 18-34')
 boxplot(cdi$pop65, main = 'Percent of Population Aged 65+')
-boxplot(cdi$docs, main = 'Number of Active Physicians')
+boxplot(cdi$pdocs, main = 'Per Capita Number of Active Physicians')
+boxplot(cdi$pbeds, main = 'Per Capita Hospital Beds')
 
 
 ```
 
 ```{r, dpi = 300}
-par(mfrow = c(2,4), dpi = 300)
-boxplot(cdi$beds, main = 'Number of Hospital Beds')
+par(mfrow = c(2,3))
 boxplot(cdi$hsgrad, main = 'Percent High School Graduates')
 boxplot(cdi$bagrad, main = 'Percent Bachelor’s Degrees')
 boxplot(cdi$poverty, main = 'Percent Below Poverty Level')
@@ -87,12 +90,11 @@ boxplot(cdi$totalinc, main = 'Total Personal Income')
 ## Marginal correlation with CRM_1000 of each variable
 
 ```{r, dpi = 300}
-cdi %>% ggplot(aes(x = area, y = CRM_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
-cdi %>% ggplot(aes(x = pop, y = CRM_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
+cdi %>% ggplot(aes(x = pop_den, y = CRM_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
 cdi %>% ggplot(aes(x = pop18, y = CRM_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red') # positive correlation
 cdi %>% ggplot(aes(x = pop65, y = CRM_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
-cdi %>% ggplot(aes(x = docs, y = CRM_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
-cdi %>% ggplot(aes(x = beds, y = CRM_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
+cdi %>% ggplot(aes(x = pdocs, y = CRM_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
+cdi %>% ggplot(aes(x = pbeds, y = CRM_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
 cdi %>% ggplot(aes(x = hsgrad, y = CRM_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red') #negative correlation
 cdi %>% ggplot(aes(x = bagrad, y = CRM_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
 cdi %>% ggplot(aes(x = poverty, y = CRM_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red') # positive correlation
@@ -153,15 +155,52 @@ Surprisingly, if we look at the CRM_1000 at state level, no outlier was found.
 
 
 
+
+## Remove Unnecessary Variables
+
+```{r}
+cdi = 
+  cdi %>% 
+  dplyr::select(-pop, -crimes, -cty)
+```
+
+
+## Checking to Outliers and Influential Points
+
+```{r}
+
+mult.fit1 = lm(CRM_1000 ~ ., data = cdi) 
+
+# residuals vs leverage plot
+plot(mult.fit1, which = 4)
+
+# remove influential points
+cdi_removeOut = cdi[-c(6),]
+
+# plot with and without influential points
+plot(cdi$poverty, cdi$CRM_1000)
+plot(cdi_removeOut$poverty, cdi_removeOut$CRM_1000)
+
+# fit model with and without influential points
+with = lm(CRM_1000 ~ ., data = cdi) 
+
+without = lm(CRM_1000 ~ ., data = cdi_removeOut)
+
+summary(with); summary(without) ##比较p value和r squared
+
+# check without diagnostics
+plot(without)
+
+
+```
+
+
+
 ## Check for transformation
 
 ```{r}
 # fit multivariate model
-cdi_pred = 
-  cdi %>% 
-  dplyr::select(-id, -cty, -crimes)
-
-mult.fit1 = lm(CRM_1000 ~ ., data = cdi_pred) 
+mult.fit1 = lm(CRM_1000 ~ ., data = cdi_removeOut) 
 summary(mult.fit1)
 
 # check diagnostics
@@ -169,11 +208,12 @@ plot(mult.fit1)
 boxcox(mult.fit1)
 ```
 
-## a = 1/2. Perform sqrt transformation.
+
+## a is close to 1/2. Perform sqrt transformation.
 
 ```{r}
 cdi_sqrt = 
-  cdi_pred %>% 
+  cdi_removeOut %>% 
   mutate(sqrt_CRM_1000 = sqrt(CRM_1000)) %>% 
   dplyr::select(-CRM_1000) %>% 
   relocate(sqrt_CRM_1000)
@@ -189,29 +229,7 @@ boxcox(mult.fit2)
 ```
 
 
-## Checking to Outliers and Influential Points
 
-```{r}
-# residuals vs leverage plot
-plot(mult.fit1, which = 4)
-
-# remove influential points
-cdi_predOut = cdi_pred[-c(1, 6),]
-
-# plot with and without influential points
-plot(cdi_pred$poverty, cdi_pred$CRM_1000)
-plot(cdi_predOut$poverty, cdi_predOut$CRM_1000)
-
-# fit model with and without influential points
-with = lm(CRM_1000 ~ ., data = cdi_pred) 
-
-without = lm(CRM_1000 ~ ., data = cdi_predOut)
-
-summary(with); summary(without) ##比较p value和r squared
-
-# check without diagnostics
-plot(without)
-```
 
 
 ## check for multicollinearity

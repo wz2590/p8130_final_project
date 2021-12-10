@@ -254,7 +254,6 @@ corrplot(cor(new_cdi), type = "upper", diag = FALSE)
 mult.fit = lm(sqrt_CRM_1000 ~ ., data = new_cdi)
 summary(mult.fit)
 check_collinearity(mult.fit)
-```
 
     state = as.factor(state),
     region = as.factor(region))
@@ -471,7 +470,6 @@ summary(forward5)
 step(mult.fit, direction = 'forward')
 ```
 
->>>>>>> ea3258c2e78405d84f6733a6bc1289b51c133da1
 
 Test Based Procedures
 
@@ -509,10 +507,10 @@ rs = summary(b)
 # plot of Cp and Adj-R2 as functions of parameters
 par(mfrow = c(1,2))
 
-plot(2:9, rs$cp, xlab ="No of parameters", ylab ="Cp Statistic")
+plot(2:9, rs$cp, xlab = "No of parameters", ylab = "Cp Statistic")
 abline(0,1)
 
-plot(2:9, rs$adjr2, xlab ="No of parameters", ylab ="Adj R2")
+plot(2:9, rs$adjr2, xlab = "No of parameters", ylab = "Adj R2")
 ```
 
 fit models

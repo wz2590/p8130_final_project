@@ -74,7 +74,6 @@ boxplot(cdi$pop65, main = 'Percent of Population Aged 65+')
 boxplot(cdi$pdocs, main = 'Per Capita Number of Active Physicians')
 boxplot(cdi$pbeds, main = 'Per Capita Hospital Beds')
 
-
 ```
 
 ```{r, dpi = 300}
@@ -255,76 +254,49 @@ Based on the correlation plot, pop is highly correlated with docs, beds, and tot
 new_cdi =
   cdi_sqrt %>% 
   mutate(
-    state = as.numeric(state),
-    region = as.numeric(region)
-  ) %>% 
-  dplyr::select(-id, -cty, -CRM_1000)
-
-pairs(new_cdi)
-
-cor(new_cdi)
-
-corrplot(cor(new_cdi), type = "upper", diag = FALSE)
-```
-
-
-```{r}
-mult.fit = lm(sqrt_CRM_1000 ~ ., data = new_cdi)
-summary(mult.fit)
-check_collinearity(mult.fit)
-
     state = as.factor(state),
     region = as.factor(region))
 
-
 mult.fit = lm(sqrt_CRM_1000 ~ ., data = new_cdi)
 summary(mult.fit)
 
-
-mult.fit %>% 
-  broom::tidy() %>% 
-  knitr::kable(digits = 3)
+mult.fit_new = lm(sqrt_CRM_1000 ~ state + pop18 + grad + pcincome + hsgrad + pop65 + bagrad + poverty + unemp + totalinc + region + pop_den + pbeds + hsgrad*bagrad + hsgrad*poverty + pop18*pop65 + bagrad*pcincome + pbeds*pdocs, data = new_cdi)
+summary(mult.fit_new)
 ```
 
 Backward Elimination
 
 ```{r}
-# No region
+# No region, NA ? 
 step1 = update(mult.fit, . ~ . -region)
 summary(step1)
 
-# No state
+# No state 
 step2 = update(step1, . ~ . -state)
 summary(step2)
 
-# No bagrad
-step3 = update(step2, . ~ . -bagrad)
+# No pop65
+step3 = update(step2, . ~ . -pop65)
 summary(step3)
 
-# No area
-step4 = update(step3, . ~ . -area)
+# No pdocs
+step4 = update(step3, . ~ . -pdocs)
 summary(step4)
 
-# No hsgrad
-step5 = update(step4, . ~ . -hsgrad)
+# No pop18
+step5 = update(step4, . ~ . -pop18)
 summary(step5)
 
-# No pop65
-step6 = update(step5, . ~ . -pop65)
-summary(step6)
-
-# No docs
-step7 = update(step6, . ~ . -docs)
-summary(step7)
-
-multi_fit1 = lm(sqrt_CRM_1000 ~ pop + pop18 + beds + poverty + unemp + pcincome + totalinc + pop * beds + pop * totalinc + beds * totalinc, data = new_cdi)
+multi_fit1 = lm(sqrt_CRM_1000 ~ bagrad + poverty + unemp + totalinc + 
+    pop_den + pbeds, data = new_cdi)
 summary(multi_fit1)
 
 # just use one function
 step(mult.fit, direction = 'backward')
-step
 
-multi_fit2 = lm(sqrt_CRM_1000 ~ state + area + pop + pop18 + pop65 + beds + bagrad + poverty + pcincome + totalinc + pop * beds + pop * totalinc + beds * totalinc, data = new_cdi)
+multi_fit2 = lm(sqrt_CRM_1000 ~ state + pop18 + poverty + totalinc + 
+    pop_den + pbeds, data = new_cdi)
+
 summary(multi_fit2)
 ```
 

@@ -60,7 +60,7 @@ No missing values were found.
 
 ## Boxplot for each variable
 
-```{r}
+```{r, dpi = 300}
 par(mfrow = c(2, 3))
 boxplot(cdi$CRM_1000, main = 'Crime Rate per 1000 people') # an obvious outlier around 300
 boxplot(cdi$area, main = 'Land Area')
@@ -73,7 +73,7 @@ boxplot(cdi$docs, main = 'Number of Active Physicians')
 ```
 
 ```{r}
-par(mfrow = c(2,4))
+par(mfrow = c(2,4), dpi = 300)
 boxplot(cdi$beds, main = 'Number of Hospital Beds')
 boxplot(cdi$hsgrad, main = 'Percent High School Graduates')
 boxplot(cdi$bagrad, main = 'Percent Bachelor’s Degrees')
@@ -85,7 +85,7 @@ boxplot(cdi$totalinc, main = 'Total Personal Income')
 
 ## Marginal correlation with CRM_1000 of each variable
 
-```{r}
+```{r, dpi = 300}
 cdi %>% ggplot(aes(x = area, y = CRM_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
 cdi %>% ggplot(aes(x = pop, y = CRM_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
 cdi %>% ggplot(aes(x = pop18, y = CRM_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red') # positive correlation

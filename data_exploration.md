@@ -192,7 +192,12 @@ boxplot(cdi$docs, main = 'Number of Active Physicians')
 ![](data_exploration_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
 
 ``` r
-par(mfrow = c(2,4))
+par(mfrow = c(2,4), dpi = 300)
+```
+
+    ## Warning in par(mfrow = c(2, 4), dpi = 300): "dpi" is not a graphical parameter
+
+``` r
 boxplot(cdi$beds, main = 'Number of Hospital Beds')
 boxplot(cdi$hsgrad, main = 'Percent High School Graduates')
 boxplot(cdi$bagrad, main = 'Percent Bachelor’s Degrees')
@@ -1645,7 +1650,7 @@ step
     ##         fit$keep <- re.arrange(keep.list[seq(nm)])
     ##     step.results(models = models[seq(nm)], fit, object, usingCp)
     ## }
-    ## <bytecode: 0x7fd70faae7a0>
+    ## <bytecode: 0x7f87557f78b8>
     ## <environment: namespace:stats>
 
 ``` r

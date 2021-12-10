@@ -1650,7 +1650,7 @@ step
     ##         fit$keep <- re.arrange(keep.list[seq(nm)])
     ##     step.results(models = models[seq(nm)], fit, object, usingCp)
     ## }
-    ## <bytecode: 0x7f87557f78b8>
+    ## <bytecode: 0x7fa09ebba2f8>
     ## <environment: namespace:stats>
 
 ``` r

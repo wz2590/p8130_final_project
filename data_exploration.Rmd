@@ -72,7 +72,7 @@ boxplot(cdi$docs, main = 'Number of Active Physicians')
 
 ```
 
-```{r}
+```{r, dpi = 300}
 par(mfrow = c(2,4), dpi = 300)
 boxplot(cdi$beds, main = 'Number of Hospital Beds')
 boxplot(cdi$hsgrad, main = 'Percent High School Graduates')

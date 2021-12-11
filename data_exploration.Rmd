@@ -232,8 +232,6 @@ corrplot(cor(cdi_cor),
          addCoef.col = "black", 
          number.cex = 0.6,
          diag = FALSE) 
-
-
 ```
  
 ## Model Selection
@@ -245,7 +243,7 @@ new_cdi =
   mutate(
     state = as.factor(state),
     region = as.factor(region)) %>% 
-  dplyr::select(-hsgrad, -pcincome)
+  dplyr::select(-bagrad, -pdocs, -totalinc)
 
 mult.fit = lm(sqrt_CRM_1000 ~ ., data = new_cdi)
 summary(mult.fit)
@@ -255,11 +253,18 @@ summary(mult.fit)
 #summary(mult.fit_new)
 ```
 
+Fit a linear model with interactions terms
+```{r}
+mult.fit_inter = lm(sqrt_CRM_1000 ~ state + pop18 + pop65 + hsgrad + poverty + unemp + pcincome + region + pop_den + pbeds + pop65 * region + poverty * region + pcincome * region, data = new_cdi)
+summary(mult.fit_inter)
+```
+
+
 Backward Elimination
 
 ```{r}
 # No region, becasue the original mulitiple linear fit, the region has NA
-step1 = update(mult.fit, . ~ . -region)
+step1 = update(mult.fit_inter, . ~ . -region)
 summary(step1)
 
 # No state 
@@ -267,50 +272,51 @@ step2 = update(step1, . ~ . -state)
 summary(step2)
 
 # No pop65
-step3 = update(step2, . ~ . -pop65)
+step3 = update(step2, . ~ . -pop65 * region)
 summary(step3)
 
 # No pdocs
-step4 = update(step3, . ~ . -pdocs)
+step4 = update(step3, . ~ . -hsgrad)
 summary(step4)
 
 # No pop18
-step5 = update(step4, . ~ . -pop18)
+step5 = update(step4, . ~ . -pcincome * region)
 summary(step5)
 
-multi_fit_back1 = lm(sqrt_CRM_1000 ~ bagrad + poverty + unemp + totalinc + 
-    pop_den + pbeds, data = new_cdi)
+# No unemp
+step6 = update(step5, . ~ . -unemp)
+summary(step6)
+
+multi_fit_back1 = lm(sqrt_CRM_1000 ~ pop18 + poverty + pop_den + pbeds + poverty * region, data = new_cdi)
 summary(multi_fit_back1)
-# multi_fit1: adjusted r squared is 0.3431, 
+# multi_fit_back1: adjusted r squared is 0.4477 
 
 # just use one function for backward 
-step(mult.fit, direction = 'backward')
+step(mult.fit_inter, direction = 'backward')
 
-multi_fit_back2 = lm(sqrt_CRM_1000 ~ state + pop18 + poverty + totalinc + 
-    pop_den + pbeds, data = new_cdi)
-
+multi_fit_back2 = lm(sqrt_CRM_1000 ~ state + pop18 + poverty + unemp + pcincome + pop_den + pbeds + poverty * region, data = new_cdi)
 summary(multi_fit_back2)
-# multi_fit2: Adjusted R-squared is 0.5808 and AIC=120.61
+# multi_fit_back2: Adjusted R-squared is 0.5806 and AIC=124.26
 ```
 
 
 Forward Selection
 
 ```{r}
-step(mult.fit, direction = 'forward')
-multi_fit_forward = lm(sqrt_CRM_1000 ~ state + pop18 + pop65 + bagrad + poverty + unemp + totalinc + region + pop_den + pdocs + pbeds, data = new_cdi)
+step(mult.fit_inter, direction = 'forward')
+multi_fit_forward = lm(sqrt_CRM_1000 ~ state + pop18 + pop65 + hsgrad + poverty + unemp + pcincome + region + pop_den + pbeds + pop65 * region + poverty * region + pcincome * region, data = new_cdi)
 summary(multi_fit_forward)
-# our Adjusted R-squared is 0.5789 and AIC=126.05
+# our Adjusted R-squared is 0.5825 and AIC=128.96
 ```
 
 use both selection
 
 ```{r}
-step(mult.fit, direction = 'both')
-multi_fit_both = lm(sqrt_CRM_1000 ~ state + pop18 + poverty + totalinc + 
-    pop_den + pbeds, data = new_cdi)
+step(mult.fit_inter, direction = 'both')
+
+multi_fit_both = lm(sqrt_CRM_1000 ~ state + pop18 + poverty + unemp + pcincome + region + pop_den + pbeds + poverty * region, data = new_cdi)
 summary(multi_fit_both)
-# our Adjusted R-squared is 0.5808 and AIC=120.61
+# our Adjusted R-squared is 0.5806 and AIC=124.26
 ```
 
 

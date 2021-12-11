@@ -9,10 +9,7 @@ output: github_document
 library(tidyverse)
 library(lubridate)
 library(dplyr)
-library(p8105.datasets)
 library(leaflet)
-library(mgcv)
-library(modelr)
 library(corrplot)
 library(MASS)
 library(performance)
@@ -45,7 +42,7 @@ cdi =
     pop_den = pop/area,
     pdocs = docs/pop,
     pbeds = beds/pop) %>%
-  dplyr::select(-id, -area, -beds, -docs) %>%  # pop and crime will be removed after detecting state outliers.
+  dplyr::select(-id, -area, -beds, -docs) %>%  # pop and crimes will be removed after detecting state outliers.
   relocate(CRM_1000)
 
 cdi
@@ -68,10 +65,10 @@ No missing values were found.
 ```{r, dpi = 300}
 par(mfrow = c(2, 3))
 boxplot(cdi$CRM_1000, main = 'Crime Rate per 1000 people') # an obvious outlier around 300
-boxplot(cdi$pop_den,main = 'Total Population')
+boxplot(cdi$pop_den,main = 'Population Density')
 boxplot(cdi$pop18, main = 'Percent of Population Aged 18-34')
 boxplot(cdi$pop65, main = 'Percent of Population Aged 65+')
-boxplot(cdi$pdocs, main = 'Per Capita Number of Active Physicians')
+boxplot(cdi$pdocs, main = 'Per Capita Active Physicians')
 boxplot(cdi$pbeds, main = 'Per Capita Hospital Beds')
 
 ```
@@ -88,7 +85,7 @@ boxplot(cdi$totalinc, main = 'Total Personal Income')
 
 ## Marginal correlation with CRM_1000 of each variable
 
-```{r, dpi = 300}
+```{r, message = FALSE, dpi = 300}
 cdi %>% ggplot(aes(x = pop_den, y = CRM_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
 cdi %>% ggplot(aes(x = pop18, y = CRM_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red') # positive correlation
 cdi %>% ggplot(aes(x = pop65, y = CRM_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
@@ -101,7 +98,6 @@ cdi %>% ggplot(aes(x = unemp, y = CRM_1000)) + geom_point(alpha = 0.3) + geom_sm
 cdi %>% ggplot(aes(x = pcincome, y = CRM_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
 cdi %>% ggplot(aes(x = totalinc, y = CRM_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
 cdi %>% ggplot(aes(x = region, y = CRM_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
-
 ```
 
 ## Identify counties with unusual crime rates.
@@ -115,9 +111,6 @@ cdi %>%
          CRM_1000 > lower - 1.5*IQR) %>% 
   dplyr::select(cty, CRM_1000) %>%
   knitr::kable(digits = 2)
-
-
-boxplot(cdi$CRM_1000, main = 'Crime Rate per 1000 people') 
 ```
 
 
@@ -146,13 +139,10 @@ cdi_state %>%
   knitr::kable(digits = 2)
 
 
-boxplot(cdi_state$state_CRM_1000, main = 'State Crime Rate per 1000 people') 
-
+boxplot(cdi_state$state_CRM_1000, main = 'State Crime Rate per 1000 people')
 ```
   
 Surprisingly, if we look at the CRM_1000 at state level, no outlier was found.
-
-
 
 
 ## Remove Unnecessary Variables
@@ -174,23 +164,18 @@ mult.fit1 = lm(CRM_1000 ~ ., data = cdi)
 plot(mult.fit1, which = 4)
 
 # remove influential points
-cdi_removeOut = cdi[-c(6),]
+cdiout = cdi[-c(6),]
 
 # plot with and without influential points
 plot(cdi$poverty, cdi$CRM_1000)
-plot(cdi_removeOut$poverty, cdi_removeOut$CRM_1000)
+plot(cdiout$poverty, cdiout$CRM_1000)
 
 # fit model with and without influential points
 with = lm(CRM_1000 ~ ., data = cdi) 
 
-without = lm(CRM_1000 ~ ., data = cdi_removeOut)
+without = lm(CRM_1000 ~ ., data = cdiout)
 
-summary(with); summary(without) ##比较p value和r squared
-
-# check without diagnostics
-plot(without)
-
-
+summary(with); summary(without) ##compare p values and r squared
 ```
 
 
@@ -199,11 +184,9 @@ plot(without)
 
 ```{r}
 # fit multivariate model
-mult.fit1 = lm(CRM_1000 ~ ., data = cdi_removeOut) 
+mult.fit1 = lm(CRM_1000 ~ ., data = cdiout) 
 summary(mult.fit1)
 
-# check diagnostics
-plot(mult.fit1)
 boxcox(mult.fit1)
 ```
 
@@ -212,7 +195,7 @@ boxcox(mult.fit1)
 
 ```{r}
 cdi_sqrt = 
-  cdi_removeOut %>% 
+  cdiout %>% 
   mutate(sqrt_CRM_1000 = sqrt(CRM_1000)) %>% 
   dplyr::select(-CRM_1000) %>% 
   relocate(sqrt_CRM_1000)
@@ -221,13 +204,9 @@ cdi_sqrt
 
 mult.fit2 = lm(sqrt_CRM_1000 ~ ., data = cdi_sqrt) 
 
-# check diagnostics
 summary(mult.fit2) ##region returned NA, why?
 boxcox(mult.fit2) 
-
 ```
-
-
 
 
 
@@ -248,9 +227,10 @@ cor(cdi_cor) %>%
 
 corrplot(cor(cdi_cor), type = "upper", diag = FALSE)
 ```
-Based on the correlation plot, pop is highly correlated with docs, beds, and totalinc; totalinc is highly correlated with docs and beds; hsgrad is highly correlated with bagrad and poverty. 
+ 
+## Model Selection
 
-
+Fit a linear model after removing highly correlated variables.
 ```{r}
 new_cdi =
   cdi_sqrt %>% 
@@ -263,7 +243,7 @@ mult.fit = lm(sqrt_CRM_1000 ~ ., data = new_cdi)
 summary(mult.fit)
 
 #不确定是否加interaction
-#mult.fit_new = lm(sqrt_CRM_1000 ~ state + pop18 + grad + pcincome + hsgrad + pop65 + bagrad + #poverty + unemp + totalinc + region + pop_den + pbeds + hsgrad*bagrad + hsgrad*poverty + #pop18*pop65 + bagrad*pcincome + pbeds*pdocs, data = new_cdi)
+#mult.fit_inter = lm(sqrt_CRM_1000 ~ state + pop18 + grad + pcincome + hsgrad + pop65 + bagrad + #poverty + unemp + totalinc + region + pop_den + pbeds + hsgrad*bagrad + hsgrad*poverty + #pop18*pop65 + bagrad*pcincome + pbeds*pdocs, data = new_cdi)
 #summary(mult.fit_new)
 ```
 
@@ -290,29 +270,27 @@ summary(step4)
 step5 = update(step4, . ~ . -pop18)
 summary(step5)
 
-multi_fit1 = lm(sqrt_CRM_1000 ~ bagrad + poverty + unemp + totalinc + 
+multi_fit_back1 = lm(sqrt_CRM_1000 ~ bagrad + poverty + unemp + totalinc + 
     pop_den + pbeds, data = new_cdi)
-summary(multi_fit1)
+summary(multi_fit_back1)
+# multi_fit1: adjusted r squared is 0.3431, 
 
 # just use one function for backward 
 step(mult.fit, direction = 'backward')
 
-multi_fit2 = lm(sqrt_CRM_1000 ~ state + pop18 + poverty + totalinc + 
+multi_fit_back2 = lm(sqrt_CRM_1000 ~ state + pop18 + poverty + totalinc + 
     pop_den + pbeds, data = new_cdi)
 
-summary(multi_fit2)
-# our Adjusted R-squared is 0.5808 and AIC=120.61
+summary(multi_fit_back2)
+# multi_fit2: Adjusted R-squared is 0.5808 and AIC=120.61
 ```
 
 
 Forward Selection
 
-forward的部分太费时，所以直接用function 一步到位
-
 ```{r}
 step(mult.fit, direction = 'forward')
-multi_fit_forward = lm(sqrt_CRM_1000 ~ state + pop18 + pop65 + bagrad + poverty + unemp + 
-    totalinc + region + pop_den + pdocs + pbeds, data = new_cdi)
+multi_fit_forward = lm(sqrt_CRM_1000 ~ state + pop18 + pop65 + bagrad + poverty + unemp + totalinc + region + pop_den + pdocs + pbeds, data = new_cdi)
 summary(multi_fit_forward)
 # our Adjusted R-squared is 0.5789 and AIC=126.05
 ```
@@ -472,53 +450,7 @@ summary(multi_fit_both)
 ```
 
 
-Test Based Procedures
 
-```{r}
-new_cdi = 
-  new_cdi %>% 
-
-  dplyr::select(sqrt_CRM_1000, area , pop18 , pop65 , beds , crimes , bagrad , 
-    poverty , pcincome , totalinc , region)
-
-  mutate(state = as.numeric(state),
-         region = as.numeric(region))
-
-mat = as.matrix(new_cdi)
-# Printing the 2 best models of each size, using the Cp criterion:
-leaps(x = mat[,2:15], y = mat[,1], nbest = 2, method = "Cp")
-
-cv_mod = 
-  cv_mod %>% 
-  mutate(
-    model_1  = map(train, ~lm(sqrt_CRM_1000 ~ area + pop18 + pop65 + beds + crimes + bagrad + 
-    poverty + pcincome + totalinc + region, data = .x))) %>%
-  mutate(
-    rmse_model_1 = map2_dbl(model_1, test, ~rmse(model = .x)))
-
-# Printing the 2 best models of each size, using the adjusted R^2 criterion:
-leaps(x = mat[,2:15], y = mat[,1], nbest = 2, method = "adjr2")
-
-
-# Function regsubsets() performs a subset selection by identifying the "best" model that contains
-# a certain number of predictors. By default "best" is chosen using SSE/RSS (smaller is better)
-b = regsubsets(sqrt_CRM_1000 ~ ., data = new_cdi)
-rs = summary(b)
-
-# plot of Cp and Adj-R2 as functions of parameters
-par(mfrow = c(1,2))
-
-plot(2:9, rs$cp, xlab = "No of parameters", ylab = "Cp Statistic")
-abline(0,1)
-
-plot(2:9, rs$adjr2, xlab = "No of parameters", ylab = "Adj R2")
-```
-
-fit models
-```{r}
-cp_fit1 = lm(sqrt_CRM_1000 ~ area + pop + pop18 + beds + poverty + totalinc + region, data = new_cdi)
-summary(cp_fit1)
-```
 
 
 

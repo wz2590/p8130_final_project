@@ -224,6 +224,7 @@ cdi_cor =
   dplyr::select(-sqrt_CRM_1000)
 
 pairs(cdi_cor)
+# Correlation matrix for all variables
 cor(cdi_cor) %>% 
   knitr::kable()
 

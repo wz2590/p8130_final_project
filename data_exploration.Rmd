@@ -298,6 +298,17 @@ multi_fit_back2 = lm(sqrt_CRM_1000 ~ state + pop18 + poverty + unemp + pcincome 
 summary(multi_fit_back2)
 # multi_fit_back2: Adjusted R-squared is 0.5806 and AIC=124.26
 ```
+# Diagnostic Plots for Backward Elimination 1
+```{r,dpi=300}
+par(mfrow=c(2,2))
+plot(multi_fit_back1)
+```
+
+# Diagnostic Plots for Backward Elimination 2
+```{r,dpi=300}
+par(mfrow=c(2,2))
+plot(multi_fit_back2)
+```
 
 
 Forward Selection
@@ -309,6 +320,12 @@ summary(multi_fit_forward)
 # our Adjusted R-squared is 0.5825 and AIC=128.96
 ```
 
+# Diagnostic Plots for Forward Selection
+```{r,dpi=300}
+par(mfrow=c(2,2))
+plot(multi_fit_forward)
+```
+
 use both selection
 
 ```{r}
@@ -317,6 +334,11 @@ step(mult.fit_inter, direction = 'both')
 multi_fit_both = lm(sqrt_CRM_1000 ~ state + pop18 + poverty + unemp + pcincome + region + pop_den + pbeds + poverty * region, data = new_cdi)
 summary(multi_fit_both)
 # our Adjusted R-squared is 0.5806 and AIC=124.26
+```
+# Diagnostic Plots for Both Selection 一样的？？
+```{r,dpi=300}
+par(mfrow=c(2,2))
+plot(multi_fit_both)
 ```
 
 
@@ -496,6 +518,12 @@ plot(2:9, rs$adjr2, xlab = "No of parameters", ylab = "Adj R2")
 
 multi_fit_test = lm(sqrt_CRM_1000 ~ pop18 + hsgrad + poverty + pcincome + region + pop_den + pbeds + poverty * region, data = cdi_test)
 summary(multi_fit_test)
+```
+
+# Diagnostic Plots for Test based procedure
+```{r,dpi=300}
+par(mfrow=c(2,2))
+plot(multi_fit_test)
 ```
 
 

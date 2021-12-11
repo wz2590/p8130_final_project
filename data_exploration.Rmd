@@ -255,19 +255,21 @@ new_cdi =
   cdi_sqrt %>% 
   mutate(
     state = as.factor(state),
-    region = as.factor(region))
+    region = as.factor(region)) %>% 
+  dplyr::select(-hsgrad, -pcincome)
 
 mult.fit = lm(sqrt_CRM_1000 ~ ., data = new_cdi)
 summary(mult.fit)
 
-mult.fit_new = lm(sqrt_CRM_1000 ~ state + pop18 + grad + pcincome + hsgrad + pop65 + bagrad + poverty + unemp + totalinc + region + pop_den + pbeds + hsgrad*bagrad + hsgrad*poverty + pop18*pop65 + bagrad*pcincome + pbeds*pdocs, data = new_cdi)
-summary(mult.fit_new)
+#不确定是否加interaction
+#mult.fit_new = lm(sqrt_CRM_1000 ~ state + pop18 + grad + pcincome + hsgrad + pop65 + bagrad + #poverty + unemp + totalinc + region + pop_den + pbeds + hsgrad*bagrad + hsgrad*poverty + #pop18*pop65 + bagrad*pcincome + pbeds*pdocs, data = new_cdi)
+#summary(mult.fit_new)
 ```
 
 Backward Elimination
 
 ```{r}
-# No region, NA ? 
+# No region, becasue the original mulitiple linear fit, the region has NA
 step1 = update(mult.fit, . ~ . -region)
 summary(step1)
 
@@ -291,173 +293,181 @@ multi_fit1 = lm(sqrt_CRM_1000 ~ bagrad + poverty + unemp + totalinc +
     pop_den + pbeds, data = new_cdi)
 summary(multi_fit1)
 
-# just use one function
+# just use one function for backward 
 step(mult.fit, direction = 'backward')
 
 multi_fit2 = lm(sqrt_CRM_1000 ~ state + pop18 + poverty + totalinc + 
     pop_den + pbeds, data = new_cdi)
 
 summary(multi_fit2)
+# our Adjusted R-squared is 0.5808 and AIC=120.61
 ```
 
 
 Forward Selection
+
+forward的部分太费时，所以直接用function 一步到位
+
 ```{r}
-mod_select = step(mult.fit, direction = 'backward')
-mod_select_1 = step(mult.fit, direction = 'forward')
+step(mult.fit, direction = 'forward')
+multi_fit_forward = lm(sqrt_CRM_1000 ~ state + pop18 + pop65 + bagrad + poverty + unemp + 
+    totalinc + region + pop_den + pdocs + pbeds, data = new_cdi)
+summary(multi_fit_forward)
+# our Adjusted R-squared is 0.5789 and AIC=126.05
 ```
 
+use both selection
+
 ```{r}
-our_new_model = lm(sqrt_CRM_1000 ~ area + pop18 + pop65 + beds + crimes + bagrad + 
-    poverty + pcincome + totalinc + region, data = new_cdi)
-#Step 1:  Fit simple linear regressions for all variables,look for the variable with lowest p-value
-fit1 = lm(sqrt_CRM_1000 ~ state, data = new_cdi)
-summary(fit1)
-fit2 = lm(sqrt_CRM_1000 ~ area, data = new_cdi)
-summary(fit2)
-fit3 = lm(sqrt_CRM_1000 ~ pop, data = new_cdi)
-summary(fit3)
-fit4 = lm(sqrt_CRM_1000 ~ pop18, data = new_cdi)
-summary(fit4)
-fit5 = lm(sqrt_CRM_1000 ~ pop65, data = new_cdi)
-summary(fit5)
-fit6 = lm(sqrt_CRM_1000 ~ docs, data = new_cdi)
-summary(fit6)
-fit7 = lm(sqrt_CRM_1000 ~ beds, data = new_cdi)
-summary(fit7)
-fit8 = lm(sqrt_CRM_1000 ~ hsgrad, data = new_cdi)
-summary(fit8)
-fit9 = lm(sqrt_CRM_1000 ~ bagrad, data = new_cdi)
-summary(fit9)
-fit10 = lm(sqrt_CRM_1000 ~ poverty, data = new_cdi)
-summary(fit10)
-fit11 = lm(sqrt_CRM_1000 ~ unemp, data = new_cdi)
-summary(fit11)
-fit12 = lm(sqrt_CRM_1000 ~ pcincome, data = new_cdi)
-summary(fit12)
-fit13 = lm(sqrt_CRM_1000 ~ totalinc, data = new_cdi)
-summary(fit13)
+step(mult.fit, direction = 'both')
+multi_fit_both = lm(sqrt_CRM_1000 ~ state + pop18 + poverty + totalinc + 
+    pop_den + pbeds, data = new_cdi)
+summary(multi_fit_both)
+# our Adjusted R-squared is 0.5808 and AIC=120.61
+```
 
 
-# Enter first the one with the lowest p-value: poverty
-forward1 = lm(sqrt_CRM_1000 ~ poverty, data = new_cdi)
-summary(forward1)
-
-### Step 2: Enter the one with the lowest p-value in the rest 
-fit1 = update(forward1, . ~ . +state)
-summary(fit1)
-fit2 = update(forward1, . ~ . +area)
-summary(fit2)
-fit3 = update(forward1, . ~ . +pop)
-summary(fit3)
-fit4 = update(forward1, . ~ . +pop18)
-summary(fit4)
-fit5 = update(forward1, . ~ . +pop65)
-summary(fit5)
-fit6 = update(forward1, . ~ . +docs)
-summary(fit6)
-fit7 = update(forward1, . ~ . +beds)
-summary(fit7)
-fit8 = update(forward1, . ~ . +hsgrad)
-summary(fit8)
-fit9 = update(forward1, . ~ . +bagrad)
-summary(fit9)
-fit10 = update(forward1, . ~ . +unemp)
-summary(fit10)
-fit11 = update(forward1, . ~ . +pcincome)
-summary(fit11)
-fit12 = update(forward1, . ~ . +totalinc)
-summary(fit12)
-
-
-# Enter the one with the lowest p-value: beds
-forward2 = update(forward1, . ~ . + beds)
-summary(forward2)
-
-### Step 3: Enter the one with the lowest p-value in the rest 
-fit1 = update(forward2, . ~ . +state)
-summary(fit1)
-fit2 = update(forward2, . ~ . +area)
-summary(fit2)
-fit3 = update(forward2, . ~ . +pop)
-summary(fit3)
-fit4 = update(forward2, . ~ . +pop18)
-summary(fit4)
-fit5 = update(forward2, . ~ . +pop65)
-summary(fit5)
-fit6 = update(forward2, . ~ . +docs)
-summary(fit6)
-fit7 = update(forward2, . ~ . +hsgrad)
-summary(fit7)
-fit8 = update(forward2, . ~ . +bagrad)
-summary(fit8)
-fit9 = update(forward2, . ~ . +unemp)
-summary(fit9)
-fit10 = update(forward2, . ~ . +pcincome)
-summary(fit10)
-fit11 = update(forward2, . ~ . +totalinc)
-summary(fit11)
-
-
-# Enter the one with the lowest p-value: bagrad
-forward3 = update(forward2, . ~ . + bagrad)
-summary(forward3)
-
-### Step 4: Enter the one with the lowest p-value in the rest 
-fit1 = update(forward2, . ~ . +state)
-summary(fit1)
-fit2 = update(forward2, . ~ . +area)
-summary(fit2)
-fit3 = update(forward2, . ~ . +pop)
-summary(fit3)
-fit4 = update(forward2, . ~ . +pop18)
-summary(fit4)
-fit5 = update(forward2, . ~ . +pop65)
-summary(fit5)
-fit6 = update(forward2, . ~ . +docs)
-summary(fit6)
-fit7 = update(forward2, . ~ . +hsgrad)
-summary(fit7)
-fit8 = update(forward2, . ~ . +unemp)
-summary(fit8)
-fit9 = update(forward2, . ~ . +pcincome)
-summary(fit9)
-fit10 = update(forward2, . ~ . +totalinc)
-summary(fit10)
-
-
-# Enter the one with the lowest p-value: unemp
-forward4 = update(forward3, . ~ . + unemp)
-summary(forward4)
-
-
-### Step 5: Enter the one with the lowest p-value in the rest 
-fit1 = update(forward2, . ~ . +state)
-summary(fit1)
-fit2 = update(forward2, . ~ . +area)
-summary(fit2)
-fit3 = update(forward2, . ~ . +pop)
-summary(fit3)
-fit4 = update(forward2, . ~ . +pop18)
-summary(fit4)
-fit5 = update(forward2, . ~ . +pop65)
-summary(fit5)
-fit6 = update(forward2, . ~ . +docs)
-summary(fit6)
-fit7 = update(forward2, . ~ . +hsgrad)
-summary(fit7)
-fit8 = update(forward2, . ~ . +pcincome)
-summary(fit8)
-fit9 = update(forward2, . ~ . +totalinc)
-summary(fit9)
-
-# Enter the one with the lowest p-value: pop18
-
-forward5 = update(forward4, . ~ . + pop18)
-summary(forward5)
-
-# fit using one function
-step(mult.fit, direction = 'forward')
+```{r}
+#```{r}
+##Step 1:  Fit simple linear regressions for all variables,look for the variable with lowest p-value
+#fit1 = lm(sqrt_CRM_1000 ~ state, data = new_cdi)
+#summary(fit1) 
+#fit2 = lm(sqrt_CRM_1000 ~ region, data = new_cdi)
+#summary(fit2) 
+#fit3 = lm(sqrt_CRM_1000 ~ totalinc, data = new_cdi)
+#summary(fit3) 
+#fit4 = lm(sqrt_CRM_1000 ~ pop18, data = new_cdi)
+#summary(fit4)
+#fit5 = lm(sqrt_CRM_1000 ~ pop65, data = new_cdi)
+#summary(fit5) 
+#fit6 = lm(sqrt_CRM_1000 ~ pdocs, data = new_cdi)
+#summary(fit6) 
+#fit7 = lm(sqrt_CRM_1000 ~ pbeds, data = new_cdi)
+#summary(fit7) 
+#fit8 = lm(sqrt_CRM_1000 ~ bagrad, data = new_cdi)
+#summary(fit8) 
+#fit9 = lm(sqrt_CRM_1000 ~ poverty, data = new_cdi)
+#summary(fit9) 
+#fit10 = lm(sqrt_CRM_1000 ~ unemp, data = new_cdi)
+#summary(fit10) 
+#fit11 = lm(sqrt_CRM_1000 ~ pop_den, data = new_cdi)
+#summary(fit11) 
+#
+#
+#
+## Enter first the one with the lowest p-value: poverty
+#forward1 = lm(sqrt_CRM_1000 ~ poverty, data = new_cdi)
+#summary(forward1)
+#
+#### Step 2: Enter the one with the lowest p-value in the rest 
+#fit1 = update(forward1, . ~ . +state)
+#summary(fit1)
+#fit2 = update(forward1, . ~ . +region)
+#summary(fit2)
+#fit3 = update(forward1, . ~ . +totalinc)
+#summary(fit3)
+#fit4 = update(forward1, . ~ . +pop18)
+#summary(fit4)
+#fit5 = update(forward1, . ~ . +pop65)
+#summary(fit5)
+#fit6 = update(forward1, . ~ . +pdocs)
+#summary(fit6)
+#fit7 = update(forward1, . ~ . +pbeds)
+#summary(fit7)
+#fit8 = update(forward1, . ~ . +bagrad)
+#summary(fit8)
+#fit9 = update(forward1, . ~ . +unemp)
+#summary(fit9)
+#fit10 = update(forward1, . ~ . +pop_den)
+#summary(fit10) 
+#
+#
+#
+## Enter the one with the lowest p-value: beds
+#forward2 = update(forward1, . ~ . + beds)
+#summary(forward2)
+#
+#### Step 3: Enter the one with the lowest p-value in the rest 
+#fit1 = update(forward2, . ~ . +state)
+#summary(fit1)
+#fit2 = update(forward2, . ~ . +area)
+#summary(fit2)
+#fit3 = update(forward2, . ~ . +pop)
+#summary(fit3)
+#fit4 = update(forward2, . ~ . +pop18)
+#summary(fit4)
+#fit5 = update(forward2, . ~ . +pop65)
+#summary(fit5)
+#fit6 = update(forward2, . ~ . +docs)
+#summary(fit6)
+#fit7 = update(forward2, . ~ . +hsgrad)
+#summary(fit7)
+#fit8 = update(forward2, . ~ . +bagrad)
+#summary(fit8)
+#fit9 = update(forward2, . ~ . +unemp)
+#summary(fit9)
+#fit10 = update(forward2, . ~ . +pcincome)
+#summary(fit10)
+#fit11 = update(forward2, . ~ . +totalinc)
+#summary(fit11)
+#
+#
+## Enter the one with the lowest p-value: bagrad
+#forward3 = update(forward2, . ~ . + bagrad)
+#summary(forward3)
+#
+#### Step 4: Enter the one with the lowest p-value in the rest 
+#fit1 = update(forward2, . ~ . +state)
+#summary(fit1)
+#fit2 = update(forward2, . ~ . +area)
+#summary(fit2)
+#fit3 = update(forward2, . ~ . +pop)
+#summary(fit3)
+#fit4 = update(forward2, . ~ . +pop18)
+#summary(fit4)
+#fit5 = update(forward2, . ~ . +pop65)
+#summary(fit5)
+#fit6 = update(forward2, . ~ . +docs)
+#summary(fit6)
+#fit7 = update(forward2, . ~ . +hsgrad)
+#summary(fit7)
+#fit8 = update(forward2, . ~ . +unemp)
+#summary(fit8)
+#fit9 = update(forward2, . ~ . +pcincome)
+#summary(fit9)
+#fit10 = update(forward2, . ~ . +totalinc)
+#summary(fit10)
+#
+#
+## Enter the one with the lowest p-value: unemp
+#forward4 = update(forward3, . ~ . + unemp)
+#summary(forward4)
+#
+#
+#### Step 5: Enter the one with the lowest p-value in the rest 
+#fit1 = update(forward2, . ~ . +state)
+#summary(fit1)
+#fit2 = update(forward2, . ~ . +area)
+#summary(fit2)
+#fit3 = update(forward2, . ~ . +pop)
+#summary(fit3)
+#fit4 = update(forward2, . ~ . +pop18)
+#summary(fit4)
+#fit5 = update(forward2, . ~ . +pop65)
+#summary(fit5)
+#fit6 = update(forward2, . ~ . +docs)
+#summary(fit6)
+#fit7 = update(forward2, . ~ . +hsgrad)
+#summary(fit7)
+#fit8 = update(forward2, . ~ . +pcincome)
+#summary(fit8)
+#fit9 = update(forward2, . ~ . +totalinc)
+#summary(fit9)
+#
+## Enter the one with the lowest p-value: pop18
+#
+#forward5 = update(forward4, . ~ . + pop18)
+#summary(forward5)
 ```
 
 

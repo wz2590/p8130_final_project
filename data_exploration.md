@@ -1558,6 +1558,31 @@ summary(multi_fit_back2)
 # multi_fit_back2: Adjusted R-squared is 0.5806 and AIC=124.26
 ```
 
+# Diagnostic Plots for Backward Elimination 1
+
+``` r
+par(mfrow=c(2,2))
+plot(multi_fit_back1)
+```
+
+![](data_exploration_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
+
+# Diagnostic Plots for Backward Elimination 2
+
+``` r
+par(mfrow=c(2,2))
+plot(multi_fit_back2)
+```
+
+    ## Warning: not plotting observations with leverage one:
+    ##   72, 231, 338, 355, 387, 428
+
+    ## Warning in sqrt(crit * p * (1 - hh)/hh): NaNs produced
+
+    ## Warning in sqrt(crit * p * (1 - hh)/hh): NaNs produced
+
+![](data_exploration_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->
+
 Forward Selection
 
 ``` r
@@ -1740,6 +1765,22 @@ summary(multi_fit_forward)
 ``` r
 # our Adjusted R-squared is 0.5825 and AIC=128.96
 ```
+
+# Diagnostic Plots for Forward Selection
+
+``` r
+par(mfrow=c(2,2))
+plot(multi_fit_forward)
+```
+
+    ## Warning: not plotting observations with leverage one:
+    ##   72, 231, 338, 355, 387, 428
+
+    ## Warning in sqrt(crit * p * (1 - hh)/hh): NaNs produced
+
+    ## Warning in sqrt(crit * p * (1 - hh)/hh): NaNs produced
+
+![](data_exploration_files/figure-gfm/unnamed-chunk-22-1.png)<!-- -->
 
 use both selection
 
@@ -1984,6 +2025,22 @@ summary(multi_fit_both)
 ``` r
 # our Adjusted R-squared is 0.5806 and AIC=124.26
 ```
+
+# Diagnostic Plots for Both Selection 一样的？？
+
+``` r
+par(mfrow=c(2,2))
+plot(multi_fit_both)
+```
+
+    ## Warning: not plotting observations with leverage one:
+    ##   72, 231, 338, 355, 387, 428
+
+    ## Warning in sqrt(crit * p * (1 - hh)/hh): NaNs produced
+
+    ## Warning in sqrt(crit * p * (1 - hh)/hh): NaNs produced
+
+![](data_exploration_files/figure-gfm/unnamed-chunk-24-1.png)<!-- -->
 
 ``` r
 #```{r}
@@ -2232,7 +2289,7 @@ abline(0,1)
 plot(2:9, rs$adjr2, xlab = "No of parameters", ylab = "Adj R2")
 ```
 
-![](data_exploration_files/figure-gfm/unnamed-chunk-22-1.png)<!-- -->
+![](data_exploration_files/figure-gfm/unnamed-chunk-26-1.png)<!-- -->
 
 ``` r
 multi_fit_test = lm(sqrt_CRM_1000 ~ pop18 + hsgrad + poverty + pcincome + region + pop_den + pbeds + poverty * region, data = cdi_test)
@@ -2265,3 +2322,12 @@ summary(multi_fit_test)
     ## Residual standard error: 1.204 on 430 degrees of freedom
     ## Multiple R-squared:  0.4925, Adjusted R-squared:  0.483 
     ## F-statistic: 52.16 on 8 and 430 DF,  p-value: < 2.2e-16
+
+# Diagnostic Plots for Test based procedure
+
+``` r
+par(mfrow=c(2,2))
+plot(multi_fit_test)
+```
+
+![](data_exploration_files/figure-gfm/unnamed-chunk-27-1.png)<!-- -->

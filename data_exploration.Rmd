@@ -17,6 +17,7 @@ library(leaps)
 library(glmnet)
 
 
+
 theme_set(theme_minimal() + theme(legend.position = "bottom"))
 
 options(
@@ -41,8 +42,8 @@ cdi =
                     labels = c("Northeast", "North_Central", "South", "West")),
     CRM_1000 = 1000*crimes/pop,
     pop_den = pop/area,
-    pdocs = docs/pop,
-    pbeds = beds/pop) %>%
+    pdocs = 100 * docs/pop,
+    pbeds = 100 * beds/pop) %>%
   dplyr::select(-id, -area, -beds, -docs) %>%  # pop and crimes will be removed after detecting state outliers.
   relocate(CRM_1000)
 
@@ -282,9 +283,6 @@ step(mult.fit_inter, direction = 'backward')
 multi_fit_back2 = lm(sqrt_CRM_1000 ~ pop18 + poverty + unemp + pcincome + region + pop_den + pbeds + poverty * region, data = new_cdi)
 summary(multi_fit_back2)
 
-anova(multi_fit_back2)
-broom::glance(multi_fit_back2)
-broom::tidy(multi_fit_back2)
 # multi_fit_back2: Adjusted R-squared is 0.5112 and AIC=146.56
 ```
 
@@ -376,6 +374,10 @@ plot(multi_fit_test)
 ```
 
 
+## Comparing models from 3 approaches
+```{r}
+stargazer::stargazer(multi_fit_back2, multi_fit_forward, multi_fit_test, type = "text", out = "table1.txt")
+```
 
 
 

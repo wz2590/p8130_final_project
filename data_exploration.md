@@ -15,8 +15,8 @@ cdi =
                     labels = c("Northeast", "North_Central", "South", "West")),
     CRM_1000 = 1000*crimes/pop,
     pop_den = pop/area,
-    pdocs = docs/pop,
-    pbeds = beds/pop) %>%
+    pdocs = 100 * docs/pop,
+    pbeds = 100 * beds/pop) %>%
   dplyr::select(-id, -area, -beds, -docs) %>%  # pop and crimes will be removed after detecting state outliers.
   relocate(CRM_1000)
 
@@ -69,21 +69,21 @@ summary(cdi)
     ##  3rd Qu.:25.32   3rd Qu.:10.900   3rd Qu.: 7.500   3rd Qu.:20270  
     ##  Max.   :52.30   Max.   :36.300   Max.   :21.300   Max.   :37541  
     ##                                                                   
-    ##     totalinc                region       pop_den             pdocs          
-    ##  Min.   :  1141   Northeast    :103   Min.   :   13.26   Min.   :0.0003559  
-    ##  1st Qu.:  2311   North_Central:108   1st Qu.:  192.34   1st Qu.:0.0012127  
-    ##  Median :  3857   South        :152   Median :  335.91   Median :0.0017509  
-    ##  Mean   :  7869   West         : 77   Mean   :  888.44   Mean   :0.0021230  
-    ##  3rd Qu.:  8654                       3rd Qu.:  756.55   3rd Qu.:0.0024915  
-    ##  Max.   :184230                       Max.   :32403.72   Max.   :0.0170377  
-    ##                                                                             
-    ##      pbeds          
-    ##  Min.   :0.0001649  
-    ##  1st Qu.:0.0021972  
-    ##  Median :0.0033287  
-    ##  Mean   :0.0036493  
-    ##  3rd Qu.:0.0045649  
-    ##  Max.   :0.0196982  
+    ##     totalinc                region       pop_den             pdocs        
+    ##  Min.   :  1141   Northeast    :103   Min.   :   13.26   Min.   :0.03559  
+    ##  1st Qu.:  2311   North_Central:108   1st Qu.:  192.34   1st Qu.:0.12127  
+    ##  Median :  3857   South        :152   Median :  335.91   Median :0.17509  
+    ##  Mean   :  7869   West         : 77   Mean   :  888.44   Mean   :0.21230  
+    ##  3rd Qu.:  8654                       3rd Qu.:  756.55   3rd Qu.:0.24915  
+    ##  Max.   :184230                       Max.   :32403.72   Max.   :1.70377  
+    ##                                                                           
+    ##      pbeds        
+    ##  Min.   :0.01649  
+    ##  1st Qu.:0.21972  
+    ##  Median :0.33287  
+    ##  Mean   :0.36493  
+    ##  3rd Qu.:0.45649  
+    ##  Max.   :1.96982  
     ## 
 
 ``` r
@@ -442,8 +442,8 @@ summary(with); summary(without) ##compare p values and r squared
     ## regionSouth                 NA         NA      NA       NA    
     ## regionWest                  NA         NA      NA       NA    
     ## pop_den              5.373e-03  4.450e-04  12.074  < 2e-16 ***
-    ## pdocs               -8.185e+02  1.060e+03  -0.773 0.440288    
-    ## pbeds                3.948e+03  8.560e+02   4.612 5.45e-06 ***
+    ## pdocs               -8.185e+00  1.060e+01  -0.773 0.440288    
+    ## pbeds                3.948e+01  8.560e+00   4.612 5.45e-06 ***
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
@@ -521,8 +521,8 @@ summary(with); summary(without) ##compare p values and r squared
     ## regionSouth                 NA         NA      NA       NA    
     ## regionWest                  NA         NA      NA       NA    
     ## pop_den              2.125e-03  6.596e-04   3.222 0.001385 ** 
-    ## pdocs               -7.029e+01  1.014e+03  -0.069 0.944792    
-    ## pbeds                4.064e+03  8.143e+02   4.990 9.20e-07 ***
+    ## pdocs               -7.029e-01  1.014e+01  -0.069 0.944792    
+    ## pbeds                4.064e+01  8.143e+00   4.990 9.20e-07 ***
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
@@ -608,8 +608,8 @@ summary(mult.fit1)
     ## regionSouth                 NA         NA      NA       NA    
     ## regionWest                  NA         NA      NA       NA    
     ## pop_den              2.125e-03  6.596e-04   3.222 0.001385 ** 
-    ## pdocs               -7.029e+01  1.014e+03  -0.069 0.944792    
-    ## pbeds                4.064e+03  8.143e+02   4.990 9.20e-07 ***
+    ## pdocs               -7.029e-01  1.014e+01  -0.069 0.944792    
+    ## pbeds                4.064e+01  8.143e+00   4.990 9.20e-07 ***
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
@@ -727,8 +727,8 @@ summary(mult.fit2)
     ## regionSouth                 NA         NA      NA       NA    
     ## regionWest                  NA         NA      NA       NA    
     ## pop_den              1.351e-04  4.489e-05   3.010 0.002784 ** 
-    ## pdocs               -2.809e+01  6.904e+01  -0.407 0.684362    
-    ## pbeds                2.671e+02  5.542e+01   4.819 2.09e-06 ***
+    ## pdocs               -2.809e-01  6.904e-01  -0.407 0.684362    
+    ## pbeds                2.671e+00  5.542e-01   4.819 2.09e-06 ***
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
@@ -828,7 +828,7 @@ summary(mult.fit)
     ## regionSouth         1.997e+00  1.751e-01  11.405  < 2e-16 ***
     ## regionWest          1.837e+00  2.022e-01   9.087  < 2e-16 ***
     ## pop_den             1.316e-04  4.338e-05   3.034  0.00256 ** 
-    ## pbeds               2.062e+02  3.767e+01   5.473 7.54e-08 ***
+    ## pbeds               2.062e+00  3.767e-01   5.473 7.54e-08 ***
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
@@ -866,7 +866,7 @@ summary(mult.fit_inter)
     ## regionSouth                   2.309e+00  1.281e+00   1.802  0.07226 .  
     ## regionWest                    4.080e+00  1.579e+00   2.584  0.01010 *  
     ## pop_den                       1.073e-04  4.637e-05   2.313  0.02121 *  
-    ## pbeds                         1.858e+02  3.819e+01   4.864 1.63e-06 ***
+    ## pbeds                         1.858e+00  3.819e-01   4.864 1.63e-06 ***
     ## pop65:regionNorth_Central     5.891e-02  7.336e-02   0.803  0.42241    
     ## pop65:regionSouth             5.955e-02  4.772e-02   1.248  0.21277    
     ## pop65:regionWest              5.574e-03  6.742e-02   0.083  0.93415    
@@ -910,7 +910,7 @@ summary(step1)
     ## unemp                        3.611e-02  3.587e-02   1.006 0.314781    
     ## pcincome                     5.099e-05  2.181e-05   2.338 0.019870 *  
     ## pop_den                      1.398e-04  4.612e-05   3.031 0.002590 ** 
-    ## pbeds                        1.861e+02  3.663e+01   5.079 5.68e-07 ***
+    ## pbeds                        1.861e+00  3.663e-01   5.079 5.68e-07 ***
     ## poverty:regionNorth_Central  8.556e-02  4.195e-02   2.039 0.042027 *  
     ## poverty:regionSouth          5.599e-02  3.605e-02   1.553 0.121158    
     ## poverty:regionWest           8.130e-02  4.018e-02   2.023 0.043667 *  
@@ -947,7 +947,7 @@ summary(step2)
     ## unemp                        3.276e-02  3.357e-02   0.976 0.329793    
     ## pcincome                     5.255e-05  2.099e-05   2.503 0.012690 *  
     ## pop_den                      1.370e-04  4.491e-05   3.051 0.002425 ** 
-    ## pbeds                        1.860e+02  3.659e+01   5.082 5.59e-07 ***
+    ## pbeds                        1.860e+00  3.659e-01   5.082 5.59e-07 ***
     ## poverty:regionNorth_Central  8.507e-02  4.187e-02   2.032 0.042781 *  
     ## poverty:regionSouth          5.529e-02  3.592e-02   1.539 0.124451    
     ## poverty:regionWest           8.099e-02  4.012e-02   2.019 0.044147 *  
@@ -978,15 +978,15 @@ summary(step3)
     ## 
     ## Coefficients:
     ##                               Estimate Std. Error t value Pr(>|t|)    
-    ## (Intercept)                  4.384e+00  5.350e-01   8.196 2.89e-15 ***
-    ## pop18                        4.767e-02  1.534e-02   3.107 0.002013 ** 
-    ## poverty                     -1.060e-01  3.155e-02  -3.361 0.000846 ***
-    ## unemp                        1.882e-02  3.412e-02   0.552 0.581527    
-    ## pop_den                      2.538e-04  4.030e-05   6.298 7.47e-10 ***
-    ## pbeds                        2.223e+02  3.747e+01   5.933 6.11e-09 ***
-    ## poverty:regionNorth_Central  1.221e-01  2.333e-02   5.232 2.63e-07 ***
-    ## poverty:regionSouth          2.148e-01  2.291e-02   9.374  < 2e-16 ***
-    ## poverty:regionWest           2.208e-01  2.438e-02   9.058  < 2e-16 ***
+    ## (Intercept)                  4.3844046  0.5349583   8.196 2.89e-15 ***
+    ## pop18                        0.0476712  0.0153419   3.107 0.002013 ** 
+    ## poverty                     -0.1060270  0.0315450  -3.361 0.000846 ***
+    ## unemp                        0.0188206  0.0341217   0.552 0.581527    
+    ## pop_den                      0.0002538  0.0000403   6.298 7.47e-10 ***
+    ## pbeds                        2.2233963  0.3747306   5.933 6.11e-09 ***
+    ## poverty:regionNorth_Central  0.1220621  0.0233316   5.232 2.63e-07 ***
+    ## poverty:regionSouth          0.2147990  0.0229146   9.374  < 2e-16 ***
+    ## poverty:regionWest           0.2208233  0.0243792   9.058  < 2e-16 ***
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
@@ -1015,7 +1015,7 @@ summary(step4)
     ## pop18                        4.503e-02  1.457e-02   3.092 0.002119 ** 
     ## poverty                     -9.634e-02  2.619e-02  -3.679 0.000264 ***
     ## pop_den                      2.539e-04  4.026e-05   6.306 7.11e-10 ***
-    ## pbeds                        2.163e+02  3.578e+01   6.044 3.26e-09 ***
+    ## pbeds                        2.163e+00  3.578e-01   6.044 3.26e-09 ***
     ## poverty:regionNorth_Central  1.195e-01  2.286e-02   5.229 2.67e-07 ***
     ## poverty:regionSouth          2.100e-01  2.122e-02   9.900  < 2e-16 ***
     ## poverty:regionWest           2.183e-01  2.394e-02   9.120  < 2e-16 ***
@@ -1042,17 +1042,17 @@ summary(multi_fit_back1)
     ## 
     ## Coefficients:
     ##                               Estimate Std. Error t value Pr(>|t|)    
-    ## (Intercept)                  3.696e+00  4.875e-01   7.583 2.12e-13 ***
-    ## pop18                        4.710e-02  1.403e-02   3.357 0.000858 ***
-    ## poverty                      1.757e-02  3.957e-02   0.444 0.657293    
-    ## pop_den                      2.235e-04  3.910e-05   5.716 2.05e-08 ***
-    ## pbeds                        1.999e+02  3.466e+01   5.766 1.55e-08 ***
-    ## regionNorth_Central         -2.028e-01  4.044e-01  -0.502 0.616186    
-    ## regionSouth                  1.605e+00  3.439e-01   4.667 4.09e-06 ***
-    ## regionWest                   1.420e+00  4.362e-01   3.255 0.001222 ** 
-    ## poverty:regionNorth_Central  1.238e-01  5.214e-02   2.374 0.018013 *  
-    ## poverty:regionSouth          4.317e-02  4.281e-02   1.009 0.313771    
-    ## poverty:regionWest           5.259e-02  5.209e-02   1.010 0.313280    
+    ## (Intercept)                  3.6964416  0.4874640   7.583 2.12e-13 ***
+    ## pop18                        0.0471038  0.0140312   3.357 0.000858 ***
+    ## poverty                      0.0175655  0.0395652   0.444 0.657293    
+    ## pop_den                      0.0002235  0.0000391   5.716 2.05e-08 ***
+    ## pbeds                        1.9987688  0.3466310   5.766 1.55e-08 ***
+    ## regionNorth_Central         -0.2028440  0.4043704  -0.502 0.616186    
+    ## regionSouth                  1.6048513  0.3438657   4.667 4.09e-06 ***
+    ## regionWest                   1.4199346  0.4361783   3.255 0.001222 ** 
+    ## poverty:regionNorth_Central  0.1238039  0.0521390   2.374 0.018013 *  
+    ## poverty:regionSouth          0.0431745  0.0428095   1.009 0.313771    
+    ## poverty:regionWest           0.0525892  0.0520916   1.010 0.313280    
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
@@ -1141,7 +1141,7 @@ step(mult.fit_inter, direction = 'backward')
     ##                  regionSouth                    regionWest  
     ##                    3.016e+00                     4.231e+00  
     ##                      pop_den                         pbeds  
-    ##                    1.112e-04                     1.870e+02  
+    ##                    1.112e-04                     1.870e+00  
     ##  poverty:regionNorth_Central           poverty:regionSouth  
     ##                    1.027e-01                    -5.264e-02  
     ##           poverty:regionWest  pcincome:regionNorth_Central  
@@ -1174,7 +1174,7 @@ summary(multi_fit_back2)
     ## regionSouth                  2.246e+00  3.633e-01   6.182 1.48e-09 ***
     ## regionWest                   1.930e+00  4.509e-01   4.280 2.31e-05 ***
     ## pop_den                      1.162e-04  4.483e-05   2.592  0.00987 ** 
-    ## pbeds                        1.876e+02  3.604e+01   5.204 3.04e-07 ***
+    ## pbeds                        1.876e+00  3.604e-01   5.204 3.04e-07 ***
     ## poverty:regionNorth_Central  6.520e-02  5.253e-02   1.241  0.21523    
     ## poverty:regionSouth         -3.091e-02  4.563e-02  -0.677  0.49859    
     ## poverty:regionWest          -1.718e-02  5.327e-02  -0.323  0.74721    
@@ -1184,57 +1184,6 @@ summary(multi_fit_back2)
     ## Residual standard error: 1.171 on 426 degrees of freedom
     ## Multiple R-squared:  0.5246, Adjusted R-squared:  0.5112 
     ## F-statistic: 39.17 on 12 and 426 DF,  p-value: < 2.2e-16
-
-``` r
-anova(multi_fit_back2)
-```
-
-    ## Analysis of Variance Table
-    ## 
-    ## Response: sqrt_CRM_1000
-    ##                 Df Sum Sq Mean Sq  F value    Pr(>F)    
-    ## pop18            1  52.14  52.138  38.0244 1.624e-09 ***
-    ## poverty          1 245.17 245.174 178.8064 < 2.2e-16 ***
-    ## unemp            1  27.17  27.168  19.8137 1.092e-05 ***
-    ## pcincome         1  69.39  69.393  50.6086 4.803e-12 ***
-    ## region           3 167.49  55.829  40.7165 < 2.2e-16 ***
-    ## pop_den          1  25.74  25.739  18.7713 1.840e-05 ***
-    ## pbeds            1  49.30  49.297  35.9522 4.317e-09 ***
-    ## poverty:region   3   8.13   2.709   1.9756    0.1169    
-    ## Residuals      426 584.12   1.371                       
-    ## ---
-    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-
-``` r
-broom::glance(multi_fit_back2)
-```
-
-    ## # A tibble: 1 × 12
-    ##   r.squared adj.r.squared sigma statistic  p.value    df logLik   AIC   BIC
-    ##       <dbl>         <dbl> <dbl>     <dbl>    <dbl> <dbl>  <dbl> <dbl> <dbl>
-    ## 1     0.525         0.511  1.17      39.2 2.62e-61    12  -686. 1399. 1456.
-    ## # … with 3 more variables: deviance <dbl>, df.residual <int>, nobs <int>
-
-``` r
-broom::tidy(multi_fit_back2)
-```
-
-    ## # A tibble: 13 × 5
-    ##    term                           estimate  std.error statistic       p.value
-    ##    <chr>                             <dbl>      <dbl>     <dbl>         <dbl>
-    ##  1 (Intercept)                   0.395      0.868         0.455 0.649        
-    ##  2 pop18                         0.0617     0.0146        4.21  0.0000313    
-    ##  3 poverty                       0.125      0.0487        2.57  0.0105       
-    ##  4 unemp                         0.0429     0.0335        1.28  0.202        
-    ##  5 pcincome                      0.0000999  0.0000220     4.54  0.00000736   
-    ##  6 regionNorth_Central           0.324      0.411         0.787 0.432        
-    ##  7 regionSouth                   2.25       0.363         6.18  0.00000000148
-    ##  8 regionWest                    1.93       0.451         4.28  0.0000231    
-    ##  9 pop_den                       0.000116   0.0000448     2.59  0.00987      
-    ## 10 pbeds                       188.        36.0           5.20  0.000000304  
-    ## 11 poverty:regionNorth_Central   0.0652     0.0525        1.24  0.215        
-    ## 12 poverty:regionSouth          -0.0309     0.0456       -0.677 0.499        
-    ## 13 poverty:regionWest           -0.0172     0.0533       -0.323 0.747
 
 ``` r
 # multi_fit_back2: Adjusted R-squared is 0.5112 and AIC=146.56
@@ -1269,7 +1218,7 @@ step(mult.fit_inter, direction = 'forward')
     ##                  regionSouth                    regionWest  
     ##                    2.309e+00                     4.080e+00  
     ##                      pop_den                         pbeds  
-    ##                    1.073e-04                     1.858e+02  
+    ##                    1.073e-04                     1.858e+00  
     ##    pop65:regionNorth_Central             pop65:regionSouth  
     ##                    5.891e-02                     5.955e-02  
     ##             pop65:regionWest   poverty:regionNorth_Central  
@@ -1309,7 +1258,7 @@ summary(multi_fit_forward)
     ## regionSouth                   2.309e+00  1.281e+00   1.802  0.07226 .  
     ## regionWest                    4.080e+00  1.579e+00   2.584  0.01010 *  
     ## pop_den                       1.073e-04  4.637e-05   2.313  0.02121 *  
-    ## pbeds                         1.858e+02  3.819e+01   4.864 1.63e-06 ***
+    ## pbeds                         1.858e+00  3.819e-01   4.864 1.63e-06 ***
     ## pop65:regionNorth_Central     5.891e-02  7.336e-02   0.803  0.42241    
     ## pop65:regionSouth             5.955e-02  4.772e-02   1.248  0.21277    
     ## pop65:regionWest              5.574e-03  6.742e-02   0.083  0.93415    
@@ -1414,7 +1363,7 @@ step(mult.fit_inter, direction = 'both')
     ##                  regionSouth                    regionWest  
     ##                    3.016e+00                     4.231e+00  
     ##                      pop_den                         pbeds  
-    ##                    1.112e-04                     1.870e+02  
+    ##                    1.112e-04                     1.870e+00  
     ##  poverty:regionNorth_Central           poverty:regionSouth  
     ##                    1.027e-01                    -5.264e-02  
     ##           poverty:regionWest  pcincome:regionNorth_Central  
@@ -1448,7 +1397,7 @@ summary(multi_fit_both)
     ## regionSouth                   3.016e+00  1.152e+00   2.619  0.00913 ** 
     ## regionWest                    4.231e+00  1.393e+00   3.037  0.00253 ** 
     ## pop_den                       1.112e-04  4.471e-05   2.488  0.01325 *  
-    ## pbeds                         1.870e+02  3.586e+01   5.216 2.87e-07 ***
+    ## pbeds                         1.870e+00  3.586e-01   5.216 2.87e-07 ***
     ## poverty:regionNorth_Central   1.027e-01  6.350e-02   1.617  0.10660    
     ## poverty:regionSouth          -5.264e-02  5.561e-02  -0.946  0.34443    
     ## poverty:regionWest           -8.552e-02  6.722e-02  -1.272  0.20398    
@@ -1587,7 +1536,7 @@ summary(multi_fit_test)
     ## pcincome        1.060e-04  2.268e-05   4.673 3.98e-06 ***
     ## region          9.126e-01  1.393e-01   6.551 1.64e-10 ***
     ## pop_den         9.193e-05  4.597e-05   2.000 0.046174 *  
-    ## pbeds           2.090e+02  3.437e+01   6.081 2.63e-09 ***
+    ## pbeds           2.090e+00  3.437e-01   6.081 2.63e-09 ***
     ## poverty:region -2.786e-02  1.672e-02  -1.667 0.096335 .  
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
@@ -1646,3 +1595,94 @@ plot(multi_fit_test)
 ```
 
 ![](data_exploration_files/figure-gfm/unnamed-chunk-26-1.png)<!-- -->
+
+## Comparing models from 3 approaches
+
+``` r
+stargazer::stargazer(multi_fit_back2, multi_fit_forward, multi_fit_test, type = "text", out = "table1.txt")
+```
+
+    ## 
+    ## ======================================================================================================
+    ##                                                         Dependent variable:                           
+    ##                              -------------------------------------------------------------------------
+    ##                                                            sqrt_CRM_1000                              
+    ##                                        (1)                      (2)                      (3)          
+    ## ------------------------------------------------------------------------------------------------------
+    ## pop18                                0.062***                 0.067***                0.072***        
+    ##                                      (0.015)                  (0.020)                  (0.016)        
+    ##                                                                                                       
+    ## pop65                                                          -0.046                                 
+    ##                                                               (0.047)                                 
+    ##                                                                                                       
+    ## hsgrad                                                         -0.003                  -0.021         
+    ##                                                               (0.015)                  (0.014)        
+    ##                                                                                                       
+    ## poverty                              0.125**                  0.155***                0.192***        
+    ##                                      (0.049)                  (0.057)                  (0.054)        
+    ##                                                                                                       
+    ## unemp                                 0.043                    0.042                                  
+    ##                                      (0.034)                  (0.036)                                 
+    ##                                                                                                       
+    ## pcincome                            0.0001***                0.0001***                0.0001***       
+    ##                                     (0.00002)                (0.00004)                (0.00002)       
+    ##                                                                                                       
+    ## regionNorth_Central                   0.324                    -2.569                                 
+    ##                                      (0.411)                  (1.588)                                 
+    ##                                                                                                       
+    ## regionSouth                          2.246***                  2.309*                                 
+    ##                                      (0.363)                  (1.281)                                 
+    ##                                                                                                       
+    ## regionWest                           1.930***                 4.080**                                 
+    ##                                      (0.451)                  (1.579)                                 
+    ##                                                                                                       
+    ## region                                                                                0.913***        
+    ##                                                                                        (0.139)        
+    ##                                                                                                       
+    ## pop_den                             0.0001***                 0.0001**                0.0001**        
+    ##                                     (0.00004)                (0.00005)                (0.00005)       
+    ##                                                                                                       
+    ## pbeds                                1.876***                 1.858***                2.090***        
+    ##                                      (0.360)                  (0.382)                  (0.344)        
+    ##                                                                                                       
+    ## pop65:regionNorth_Central                                      0.059                                  
+    ##                                                               (0.073)                                 
+    ##                                                                                                       
+    ## pop65:regionSouth                                              0.060                                  
+    ##                                                               (0.048)                                 
+    ##                                                                                                       
+    ## pop65:regionWest                                               0.006                                  
+    ##                                                               (0.067)                                 
+    ##                                                                                                       
+    ## poverty:regionNorth_Central           0.065                    0.082                                  
+    ##                                      (0.053)                  (0.070)                                 
+    ##                                                                                                       
+    ## poverty:regionSouth                   -0.031                   -0.068                                 
+    ##                                      (0.046)                  (0.058)                                 
+    ##                                                                                                       
+    ## poverty:regionWest                    -0.017                   -0.095                                 
+    ##                                      (0.053)                  (0.071)                                 
+    ##                                                                                                       
+    ## pcincome:regionNorth_Central                                  0.0001*                                 
+    ##                                                               (0.0001)                                
+    ##                                                                                                       
+    ## pcincome:regionSouth                                          -0.00003                                
+    ##                                                              (0.00004)                                
+    ##                                                                                                       
+    ## pcincome:regionWest                                           -0.0001*                                
+    ##                                                               (0.0001)                                
+    ##                                                                                                       
+    ## poverty:region                                                                         -0.028*        
+    ##                                                                                        (0.017)        
+    ##                                                                                                       
+    ## Constant                              0.395                    0.544                    0.845         
+    ##                                      (0.868)                  (1.755)                  (1.095)        
+    ##                                                                                                       
+    ## ------------------------------------------------------------------------------------------------------
+    ## Observations                           439                      439                      439          
+    ## R2                                    0.525                    0.539                    0.492         
+    ## Adjusted R2                           0.511                    0.517                    0.483         
+    ## Residual Std. Error              1.171 (df = 426)         1.164 (df = 418)        1.204 (df = 430)    
+    ## F Statistic                  39.171*** (df = 12; 426) 24.423*** (df = 20; 418) 52.159*** (df = 8; 430)
+    ## ======================================================================================================
+    ## Note:                                                                      *p<0.1; **p<0.05; ***p<0.01

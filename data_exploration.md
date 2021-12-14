@@ -1186,6 +1186,57 @@ summary(multi_fit_back2)
     ## F-statistic: 39.17 on 12 and 426 DF,  p-value: < 2.2e-16
 
 ``` r
+anova(multi_fit_back2)
+```
+
+    ## Analysis of Variance Table
+    ## 
+    ## Response: sqrt_CRM_1000
+    ##                 Df Sum Sq Mean Sq  F value    Pr(>F)    
+    ## pop18            1  52.14  52.138  38.0244 1.624e-09 ***
+    ## poverty          1 245.17 245.174 178.8064 < 2.2e-16 ***
+    ## unemp            1  27.17  27.168  19.8137 1.092e-05 ***
+    ## pcincome         1  69.39  69.393  50.6086 4.803e-12 ***
+    ## region           3 167.49  55.829  40.7165 < 2.2e-16 ***
+    ## pop_den          1  25.74  25.739  18.7713 1.840e-05 ***
+    ## pbeds            1  49.30  49.297  35.9522 4.317e-09 ***
+    ## poverty:region   3   8.13   2.709   1.9756    0.1169    
+    ## Residuals      426 584.12   1.371                       
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+``` r
+broom::glance(multi_fit_back2)
+```
+
+    ## # A tibble: 1 × 12
+    ##   r.squared adj.r.squared sigma statistic  p.value    df logLik   AIC   BIC
+    ##       <dbl>         <dbl> <dbl>     <dbl>    <dbl> <dbl>  <dbl> <dbl> <dbl>
+    ## 1     0.525         0.511  1.17      39.2 2.62e-61    12  -686. 1399. 1456.
+    ## # … with 3 more variables: deviance <dbl>, df.residual <int>, nobs <int>
+
+``` r
+broom::tidy(multi_fit_back2)
+```
+
+    ## # A tibble: 13 × 5
+    ##    term                           estimate  std.error statistic       p.value
+    ##    <chr>                             <dbl>      <dbl>     <dbl>         <dbl>
+    ##  1 (Intercept)                   0.395      0.868         0.455 0.649        
+    ##  2 pop18                         0.0617     0.0146        4.21  0.0000313    
+    ##  3 poverty                       0.125      0.0487        2.57  0.0105       
+    ##  4 unemp                         0.0429     0.0335        1.28  0.202        
+    ##  5 pcincome                      0.0000999  0.0000220     4.54  0.00000736   
+    ##  6 regionNorth_Central           0.324      0.411         0.787 0.432        
+    ##  7 regionSouth                   2.25       0.363         6.18  0.00000000148
+    ##  8 regionWest                    1.93       0.451         4.28  0.0000231    
+    ##  9 pop_den                       0.000116   0.0000448     2.59  0.00987      
+    ## 10 pbeds                       188.        36.0           5.20  0.000000304  
+    ## 11 poverty:regionNorth_Central   0.0652     0.0525        1.24  0.215        
+    ## 12 poverty:regionSouth          -0.0309     0.0456       -0.677 0.499        
+    ## 13 poverty:regionWest           -0.0172     0.0533       -0.323 0.747
+
+``` r
 # multi_fit_back2: Adjusted R-squared is 0.5112 and AIC=146.56
 ```
 

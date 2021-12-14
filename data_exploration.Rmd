@@ -14,6 +14,7 @@ library(corrplot)
 library(MASS)
 library(performance)
 library(leaps)
+library(glmnet)
 
 
 theme_set(theme_minimal() + theme(legend.position = "bottom"))
@@ -249,6 +250,52 @@ Fit a linear model with interactions terms
 ```{r}
 mult.fit_inter = lm(sqrt_CRM_1000 ~ pop18 + pop65 + hsgrad + poverty + unemp + pcincome + region + pop_den + pbeds + pop65 * region + poverty * region + pcincome * region, data = new_cdi)
 summary(mult.fit_inter)
+```
+
+尝试一下新的 LASSO
+```{r}
+x = model.matrix(CRM_1000 ~ ., cdi)[,-1]
+y = cdi$CRM_1000
+
+lambda = 10^(seq(3, -2, -0.1))
+
+lasso_fit =
+  glmnet(x, y, lambda = lambda)
+
+lasso_cv =
+  cv.glmnet(x, y, lambda = lambda)
+
+lambda_opt = lasso_cv$lambda.min
+
+broom::tidy(lasso_fit) %>% 
+  dplyr::select(term, lambda, estimate) %>% 
+  complete(term, lambda, fill = list(estimate = 0) ) %>% 
+  filter(term != "(Intercept)") %>% 
+  ggplot(aes(x = log(lambda, 10), y = estimate, group = term, color = term)) + 
+  geom_path() + 
+  geom_vline(xintercept = log(lambda_opt, 10), color = "blue", size = 1.2) +
+  theme(legend.position = "none")
+
+broom::tidy(lasso_cv) %>% 
+  ggplot(aes(x = log(lambda, 10), y = estimate)) + 
+  geom_point()  
+
+lasso_fit = 
+  glmnet(x, y, lambda = lambda_opt)
+
+lasso_fit %>% broom::tidy()
+```
+
+
+```{r}
+mult.fit_lasso_1 = lm(CRM_1000 ~ pop18 + pop65 + poverty + bagrad + totalinc + pop_den + pbeds + state, data = cdi)
+summary(mult.fit_lasso_1)
+```
+
+
+```{r}
+mult.fit_lasso = lm(sqrt_CRM_1000 ~ pop18 + poverty + bagrad + pcincome + pop_den + state, data = cdi_sqrt)
+summary(mult.fit_lasso)
 ```
 
 

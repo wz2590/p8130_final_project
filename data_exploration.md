@@ -3,28 +3,6 @@ data\_exploration
 Weiheng Zhang
 2021/11/28
 
-``` r
-library(tidyverse)
-library(lubridate)
-library(dplyr)
-library(leaflet)
-library(corrplot)
-library(MASS)
-library(performance)
-library(leaps)
-
-
-theme_set(theme_minimal() + theme(legend.position = "bottom"))
-
-options(
-  ggplot2.continuous.colour = "viridis",
-  ggplot2.continuous.fill = "viridis"
-)
-
-scale_colour_discrete = scale_color_viridis_d
-scale_fill_discrete = scale_fill_viridis_d
-```
-
 ## Data cleaning
 
 ``` r
@@ -176,7 +154,7 @@ map(cdi, ~sum(is.na(.)))
 
 No missing values were found.
 
-## Boxplot for each variable
+Boxplot for each variable
 
 ``` r
 par(mfrow = c(2, 3))
@@ -645,7 +623,7 @@ boxcox(mult.fit1)
 
 ![](data_exploration_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
 
-## a is close to 1/2. Perform sqrt transformation.
+a is close to 1/2. Perform sqrt transformation.
 
 ``` r
 cdi_sqrt = 
@@ -676,7 +654,7 @@ cdi_sqrt
 ``` r
 mult.fit2 = lm(sqrt_CRM_1000 ~ ., data = cdi_sqrt) 
 
-summary(mult.fit2) ##region returned NA, why?
+summary(mult.fit2)
 ```
 
     ## 
@@ -803,21 +781,15 @@ cor(cdi_cor) %>%
 | pbeds    | -0.0224824 |  0.0295423 |  0.2471372 | -0.2115757 | -0.0452782 |  0.3730669 | -0.0629361 | -0.0534450 |  0.0057142 | -0.1135005 |  0.2784009 |  0.6667072 |  1.0000000 |
 
 ``` r
-corrplot(cor(cdi_cor), type = "upper", diag = FALSE)
-```
-
-![](data_exploration_files/figure-gfm/unnamed-chunk-15-2.png)<!-- -->
-
-``` r
 corrplot(cor(cdi_cor), 
          method = "color", 
-         type = "upper", ## order = "hclust",
+         type = "upper",
          addCoef.col = "black", 
          number.cex = 0.6,
          diag = FALSE) 
 ```
 
-![](data_exploration_files/figure-gfm/unnamed-chunk-15-3.png)<!-- -->
+![](data_exploration_files/figure-gfm/unnamed-chunk-15-2.png)<!-- -->
 
 ## Model Selection
 
@@ -829,7 +801,7 @@ new_cdi =
   mutate(
     state = as.factor(state),
     region = as.factor(region)) %>% 
-  dplyr::select(-bagrad, -pdocs, -totalinc)
+  dplyr::select(-state, -bagrad, -pdocs, -totalinc)
 
 mult.fit = lm(sqrt_CRM_1000 ~ ., data = new_cdi)
 summary(mult.fit)
@@ -841,315 +813,82 @@ summary(mult.fit)
     ## 
     ## Residuals:
     ##     Min      1Q  Median      3Q     Max 
-    ## -3.5387 -0.6564  0.0000  0.6710  3.4132 
+    ## -4.1650 -0.6753  0.0156  0.7786  3.9944 
     ## 
-    ## Coefficients: (3 not defined because of singularities)
-    ##                       Estimate Std. Error t value Pr(>|t|)    
-    ## (Intercept)          2.538e+00  1.623e+00   1.564 0.118704    
-    ## stateAR              1.062e+00  8.807e-01   1.206 0.228674    
-    ## stateAZ              9.548e-01  6.636e-01   1.439 0.151039    
-    ## stateCA              2.460e-01  4.879e-01   0.504 0.614482    
-    ## stateCO              8.822e-01  5.693e-01   1.550 0.122059    
-    ## stateCT             -1.429e+00  6.021e-01  -2.373 0.018140 *  
-    ## stateDC             -6.713e-01  1.231e+00  -0.545 0.585930    
-    ## stateDE              4.967e-01  8.860e-01   0.561 0.575422    
-    ## stateFL              1.359e+00  5.034e-01   2.700 0.007237 ** 
-    ## stateGA              1.112e+00  5.541e-01   2.007 0.045412 *  
-    ## stateHI              1.309e+00  7.649e-01   1.711 0.087845 .  
-    ## stateID              2.043e-01  1.181e+00   0.173 0.862719    
-    ## stateIL             -4.534e-01  5.089e-01  -0.891 0.373521    
-    ## stateIN             -1.093e+00  5.130e-01  -2.130 0.033795 *  
-    ## stateKS              1.516e+00  6.942e-01   2.184 0.029555 *  
-    ## stateKY             -6.585e-01  7.573e-01  -0.870 0.385086    
-    ## stateLA             -1.319e-01  5.648e-01  -0.233 0.815507    
-    ## stateMA             -1.786e+00  5.957e-01  -2.998 0.002893 ** 
-    ## stateMD              1.486e-01  5.628e-01   0.264 0.791966    
-    ## stateME             -8.909e-01  6.570e-01  -1.356 0.175922    
-    ## stateMI              2.379e-01  5.198e-01   0.458 0.647385    
-    ## stateMN             -8.472e-01  6.055e-01  -1.399 0.162593    
-    ## stateMO             -4.186e-01  5.833e-01  -0.718 0.473413    
-    ## stateMS             -1.747e-01  7.618e-01  -0.229 0.818769    
-    ## stateMT             -1.379e+00  1.180e+00  -1.169 0.243269    
-    ## stateNC              5.102e-01  4.955e-01   1.030 0.303803    
-    ## stateND             -2.014e+00  1.182e+00  -1.704 0.089204 .  
-    ## stateNE              1.421e-01  7.734e-01   0.184 0.854337    
-    ## stateNH             -1.262e+00  7.149e-01  -1.765 0.078301 .  
-    ## stateNJ             -7.161e-01  5.271e-01  -1.359 0.175078    
-    ## stateNM              1.149e+00  8.912e-01   1.290 0.197975    
-    ## stateNV              1.354e+00  8.803e-01   1.538 0.124856    
-    ## stateNY             -1.085e+00  4.962e-01  -2.187 0.029324 *  
-    ## stateOH             -1.035e+00  4.803e-01  -2.155 0.031808 *  
-    ## stateOK              1.025e+00  6.969e-01   1.471 0.142136    
-    ## stateOR              9.748e-01  6.328e-01   1.541 0.124262    
-    ## statePA             -1.835e+00  4.813e-01  -3.814 0.000159 ***
-    ## stateRI             -2.992e-01  7.833e-01  -0.382 0.702709    
-    ## stateSC              1.124e+00  5.325e-01   2.111 0.035382 *  
-    ## stateSD             -1.029e+00  1.181e+00  -0.872 0.383894    
-    ## stateTN              1.916e-01  5.671e-01   0.338 0.735661    
-    ## stateTX              1.055e+00  4.702e-01   2.245 0.025346 *  
-    ## stateUT              6.566e-01  7.278e-01   0.902 0.367539    
-    ## stateVA             -1.260e-01  5.849e-01  -0.215 0.829549    
-    ## stateVT             -1.642e+00  1.180e+00  -1.392 0.164822    
-    ## stateWA              8.674e-01  5.678e-01   1.528 0.127378    
-    ## stateWI             -1.252e-01  5.415e-01  -0.231 0.817244    
-    ## stateWV             -9.321e-01  1.172e+00  -0.795 0.426879    
-    ## pop18                6.276e-02  2.024e-02   3.101 0.002073 ** 
-    ## pop65               -1.727e-02  2.357e-02  -0.733 0.464309    
-    ## hsgrad              -5.641e-03  1.721e-02  -0.328 0.743320    
-    ## poverty              9.091e-02  2.561e-02   3.549 0.000434 ***
-    ## unemp                5.176e-02  4.252e-02   1.217 0.224296    
-    ## pcincome             8.428e-05  2.393e-05   3.522 0.000480 ***
-    ## regionNorth_Central         NA         NA      NA       NA    
-    ## regionSouth                 NA         NA      NA       NA    
-    ## regionWest                  NA         NA      NA       NA    
-    ## pop_den              1.625e-04  4.453e-05   3.650 0.000299 ***
-    ## pbeds                2.485e+02  3.909e+01   6.356 5.88e-10 ***
+    ## Coefficients:
+    ##                      Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)         2.101e-01  1.417e+00   0.148  0.88224    
+    ## pop18               6.158e-02  1.928e-02   3.194  0.00151 ** 
+    ## pop65               4.399e-03  2.025e-02   0.217  0.82816    
+    ## hsgrad              3.190e-03  1.470e-02   0.217  0.82832    
+    ## poverty             1.062e-01  2.324e-02   4.571 6.36e-06 ***
+    ## unemp               5.423e-02  3.442e-02   1.576  0.11579    
+    ## pcincome            9.206e-05  2.157e-05   4.268 2.43e-05 ***
+    ## regionNorth_Central 8.561e-01  1.781e-01   4.807 2.13e-06 ***
+    ## regionSouth         1.997e+00  1.751e-01  11.405  < 2e-16 ***
+    ## regionWest          1.837e+00  2.022e-01   9.087  < 2e-16 ***
+    ## pop_den             1.316e-04  4.338e-05   3.034  0.00256 ** 
+    ## pbeds               2.062e+02  3.767e+01   5.473 7.54e-08 ***
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
-    ## Residual standard error: 1.091 on 383 degrees of freedom
-    ## Multiple R-squared:  0.6286, Adjusted R-squared:  0.5753 
-    ## F-statistic: 11.79 on 55 and 383 DF,  p-value: < 2.2e-16
-
-``` r
-#不确定是否加interaction
-#mult.fit_inter = lm(sqrt_CRM_1000 ~ state + pop18 + grad + pcincome + hsgrad + pop65 + bagrad + #poverty + unemp + totalinc + region + pop_den + pbeds + hsgrad*bagrad + hsgrad*poverty + #pop18*pop65 + bagrad*pcincome + pbeds*pdocs, data = new_cdi)
-#summary(mult.fit_new)
-```
+    ## Residual standard error: 1.178 on 427 degrees of freedom
+    ## Multiple R-squared:  0.5181, Adjusted R-squared:  0.5057 
+    ## F-statistic: 41.73 on 11 and 427 DF,  p-value: < 2.2e-16
 
 Fit a linear model with interactions terms
 
 ``` r
-mult.fit_inter = lm(sqrt_CRM_1000 ~ state + pop18 + pop65 + hsgrad + poverty + unemp + pcincome + region + pop_den + pbeds + pop65 * region + poverty * region + pcincome * region, data = new_cdi)
+mult.fit_inter = lm(sqrt_CRM_1000 ~ pop18 + pop65 + hsgrad + poverty + unemp + pcincome + region + pop_den + pbeds + pop65 * region + poverty * region + pcincome * region, data = new_cdi)
 summary(mult.fit_inter)
 ```
 
     ## 
     ## Call:
-    ## lm(formula = sqrt_CRM_1000 ~ state + pop18 + pop65 + hsgrad + 
-    ##     poverty + unemp + pcincome + region + pop_den + pbeds + pop65 * 
-    ##     region + poverty * region + pcincome * region, data = new_cdi)
+    ## lm(formula = sqrt_CRM_1000 ~ pop18 + pop65 + hsgrad + poverty + 
+    ##     unemp + pcincome + region + pop_den + pbeds + pop65 * region + 
+    ##     poverty * region + pcincome * region, data = new_cdi)
     ## 
     ## Residuals:
     ##     Min      1Q  Median      3Q     Max 
-    ## -3.6958 -0.6257 -0.0121  0.6979  3.3319 
+    ## -4.2073 -0.6863  0.0669  0.7199  3.9311 
     ## 
-    ## Coefficients: (3 not defined because of singularities)
+    ## Coefficients:
     ##                                Estimate Std. Error t value Pr(>|t|)    
-    ## (Intercept)                   2.715e+00  1.668e+00   1.627  0.10452    
-    ## stateAR                       1.101e+00  8.742e-01   1.260  0.20846    
-    ## stateAZ                       3.530e+00  1.683e+00   2.097  0.03664 *  
-    ## stateCA                       2.781e+00  1.609e+00   1.729  0.08470 .  
-    ## stateCO                       3.223e+00  1.551e+00   2.079  0.03832 *  
-    ## stateCT                      -1.393e+00  1.461e+00  -0.953  0.34118    
-    ## stateDC                      -8.244e-01  1.252e+00  -0.659  0.51056    
-    ## stateDE                       5.276e-01  1.516e+00   0.348  0.72811    
-    ## stateFL                       1.400e+00  5.087e-01   2.752  0.00622 ** 
-    ## stateGA                       9.598e-01  5.543e-01   1.731  0.08421 .  
-    ## stateHI                       3.662e+00  1.627e+00   2.251  0.02498 *  
-    ## stateID                       2.504e+00  1.818e+00   1.377  0.16921    
-    ## stateIL                      -2.904e+00  1.546e+00  -1.878  0.06114 .  
-    ## stateIN                      -3.441e+00  1.472e+00  -2.337  0.01995 *  
-    ## stateKS                      -9.754e-01  1.617e+00  -0.603  0.54664    
-    ## stateKY                      -7.110e-01  7.518e-01  -0.946  0.34491    
-    ## stateLA                      -5.732e-02  5.639e-01  -0.102  0.91909    
-    ## stateMA                      -1.783e+00  1.493e+00  -1.194  0.23334    
-    ## stateMD                      -2.424e-01  5.774e-01  -0.420  0.67486    
-    ## stateME                      -8.730e-01  1.409e+00  -0.620  0.53595    
-    ## stateMI                      -2.214e+00  1.520e+00  -1.457  0.14604    
-    ## stateMN                      -3.051e+00  1.521e+00  -2.006  0.04561 *  
-    ## stateMO                      -2.745e+00  1.518e+00  -1.808  0.07139 .  
-    ## stateMS                      -5.432e-02  7.570e-01  -0.072  0.94283    
-    ## stateMT                       1.152e+00  1.875e+00   0.614  0.53956    
-    ## stateNC                       4.006e-01  4.942e-01   0.811  0.41811    
-    ## stateND                      -4.029e+00  1.736e+00  -2.321  0.02083 *  
-    ## stateNE                      -1.878e+00  1.508e+00  -1.245  0.21392    
-    ## stateNH                      -1.131e+00  1.401e+00  -0.807  0.41997    
-    ## stateNJ                      -6.382e-01  1.467e+00  -0.435  0.66387    
-    ## stateNM                       3.534e+00  1.779e+00   1.987  0.04767 *  
-    ## stateNV                       3.731e+00  1.692e+00   2.205  0.02804 *  
-    ## stateNY                      -1.080e+00  1.394e+00  -0.775  0.43881    
-    ## stateOH                      -3.479e+00  1.476e+00  -2.357  0.01893 *  
-    ## stateOK                       9.963e-01  6.923e-01   1.439  0.15093    
-    ## stateOR                       3.436e+00  1.588e+00   2.164  0.03109 *  
-    ## statePA                      -1.956e+00  1.396e+00  -1.401  0.16196    
-    ## stateRI                      -3.838e-01  1.493e+00  -0.257  0.79726    
-    ## stateSC                       1.054e+00  5.293e-01   1.991  0.04721 *  
-    ## stateSD                      -3.127e+00  1.801e+00  -1.736  0.08332 .  
-    ## stateTN                       1.393e-01  5.629e-01   0.247  0.80470    
-    ## stateTX                       1.001e+00  4.682e-01   2.138  0.03315 *  
-    ## stateUT                       2.629e+00  1.430e+00   1.838  0.06684 .  
-    ## stateVA                      -4.577e-01  5.953e-01  -0.769  0.44249    
-    ## stateVT                      -1.398e+00  1.669e+00  -0.838  0.40271    
-    ## stateWA                       3.223e+00  1.530e+00   2.107  0.03579 *  
-    ## stateWI                      -2.424e+00  1.494e+00  -1.622  0.10554    
-    ## stateWV                      -8.052e-01  1.164e+00  -0.692  0.48942    
-    ## pop18                         6.819e-02  2.077e-02   3.283  0.00113 ** 
-    ## pop65                         2.669e-02  4.985e-02   0.535  0.59269    
-    ## hsgrad                       -1.232e-02  1.771e-02  -0.696  0.48693    
-    ## poverty                       9.869e-02  5.674e-02   1.739  0.08280 .  
-    ## unemp                         3.802e-02  4.490e-02   0.847  0.39761    
-    ## pcincome                      7.361e-05  4.031e-05   1.826  0.06866 .  
-    ## regionNorth_Central                  NA         NA      NA       NA    
-    ## regionSouth                          NA         NA      NA       NA    
-    ## regionWest                           NA         NA      NA       NA    
-    ## pop_den                       1.570e-04  4.843e-05   3.243  0.00129 ** 
-    ## pbeds                         2.126e+02  4.058e+01   5.238 2.72e-07 ***
-    ## pop65:regionNorth_Central     1.660e-02  7.498e-02   0.221  0.82489    
-    ## pop65:regionSouth            -5.970e-02  5.223e-02  -1.143  0.25380    
-    ## pop65:regionWest             -9.876e-02  7.513e-02  -1.315  0.18947    
-    ## poverty:regionNorth_Central   7.827e-02  6.944e-02   1.127  0.26044    
-    ## poverty:regionSouth          -1.501e-02  5.792e-02  -0.259  0.79559    
-    ## poverty:regionWest           -5.217e-02  7.175e-02  -0.727  0.46760    
-    ## pcincome:regionNorth_Central  8.879e-05  5.945e-05   1.493  0.13616    
-    ## pcincome:regionSouth          5.270e-05  4.884e-05   1.079  0.28126    
-    ## pcincome:regionWest          -4.490e-05  5.754e-05  -0.780  0.43566    
+    ## (Intercept)                   5.439e-01  1.755e+00   0.310  0.75676    
+    ## pop18                         6.689e-02  1.989e-02   3.364  0.00084 ***
+    ## pop65                        -4.562e-02  4.730e-02  -0.964  0.33539    
+    ## hsgrad                       -2.708e-03  1.522e-02  -0.178  0.85889    
+    ## poverty                       1.555e-01  5.726e-02   2.715  0.00690 ** 
+    ## unemp                         4.236e-02  3.564e-02   1.188  0.23535    
+    ## pcincome                      1.176e-04  3.619e-05   3.250  0.00125 ** 
+    ## regionNorth_Central          -2.569e+00  1.588e+00  -1.618  0.10637    
+    ## regionSouth                   2.309e+00  1.281e+00   1.802  0.07226 .  
+    ## regionWest                    4.080e+00  1.579e+00   2.584  0.01010 *  
+    ## pop_den                       1.073e-04  4.637e-05   2.313  0.02121 *  
+    ## pbeds                         1.858e+02  3.819e+01   4.864 1.63e-06 ***
+    ## pop65:regionNorth_Central     5.891e-02  7.336e-02   0.803  0.42241    
+    ## pop65:regionSouth             5.955e-02  4.772e-02   1.248  0.21277    
+    ## pop65:regionWest              5.574e-03  6.742e-02   0.083  0.93415    
+    ## poverty:regionNorth_Central   8.235e-02  6.982e-02   1.179  0.23888    
+    ## poverty:regionSouth          -6.764e-02  5.769e-02  -1.172  0.24167    
+    ## poverty:regionWest           -9.547e-02  7.071e-02  -1.350  0.17773    
+    ## pcincome:regionNorth_Central  1.079e-04  5.810e-05   1.857  0.06407 .  
+    ## pcincome:regionSouth         -3.148e-05  4.493e-05  -0.700  0.48401    
+    ## pcincome:regionWest          -8.996e-05  5.265e-05  -1.709  0.08822 .  
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
-    ## Residual standard error: 1.082 on 374 degrees of freedom
-    ## Multiple R-squared:  0.6435, Adjusted R-squared:  0.5825 
-    ## F-statistic: 10.55 on 64 and 374 DF,  p-value: < 2.2e-16
+    ## Residual standard error: 1.164 on 418 degrees of freedom
+    ## Multiple R-squared:  0.5389, Adjusted R-squared:  0.5168 
+    ## F-statistic: 24.42 on 20 and 418 DF,  p-value: < 2.2e-16
 
 Backward Elimination
 
 ``` r
-# No region, becasue the original mulitiple linear fit, the region has NA
-step1 = update(mult.fit_inter, . ~ . -region)
+# No pop65 * region
+step1 = update(mult.fit_inter, . ~ . -pop65 * region)
 summary(step1)
-```
-
-    ## 
-    ## Call:
-    ## lm(formula = sqrt_CRM_1000 ~ state + pop18 + pop65 + hsgrad + 
-    ##     poverty + unemp + pcincome + pop_den + pbeds + pop65:region + 
-    ##     poverty:region + pcincome:region, data = new_cdi)
-    ## 
-    ## Residuals:
-    ##     Min      1Q  Median      3Q     Max 
-    ## -3.6958 -0.6257 -0.0121  0.6979  3.3319 
-    ## 
-    ## Coefficients:
-    ##                                Estimate Std. Error t value Pr(>|t|)    
-    ## (Intercept)                   2.715e+00  1.668e+00   1.627  0.10452    
-    ## stateAR                       1.101e+00  8.742e-01   1.260  0.20846    
-    ## stateAZ                       3.530e+00  1.683e+00   2.097  0.03664 *  
-    ## stateCA                       2.781e+00  1.609e+00   1.729  0.08470 .  
-    ## stateCO                       3.223e+00  1.551e+00   2.079  0.03832 *  
-    ## stateCT                      -1.393e+00  1.461e+00  -0.953  0.34118    
-    ## stateDC                      -8.244e-01  1.252e+00  -0.659  0.51056    
-    ## stateDE                       5.276e-01  1.516e+00   0.348  0.72811    
-    ## stateFL                       1.400e+00  5.087e-01   2.752  0.00622 ** 
-    ## stateGA                       9.598e-01  5.543e-01   1.731  0.08421 .  
-    ## stateHI                       3.662e+00  1.627e+00   2.251  0.02498 *  
-    ## stateID                       2.504e+00  1.818e+00   1.377  0.16921    
-    ## stateIL                      -2.904e+00  1.546e+00  -1.878  0.06114 .  
-    ## stateIN                      -3.441e+00  1.472e+00  -2.337  0.01995 *  
-    ## stateKS                      -9.754e-01  1.617e+00  -0.603  0.54664    
-    ## stateKY                      -7.110e-01  7.518e-01  -0.946  0.34491    
-    ## stateLA                      -5.732e-02  5.639e-01  -0.102  0.91909    
-    ## stateMA                      -1.783e+00  1.493e+00  -1.194  0.23334    
-    ## stateMD                      -2.424e-01  5.774e-01  -0.420  0.67486    
-    ## stateME                      -8.730e-01  1.409e+00  -0.620  0.53595    
-    ## stateMI                      -2.214e+00  1.520e+00  -1.457  0.14604    
-    ## stateMN                      -3.051e+00  1.521e+00  -2.006  0.04561 *  
-    ## stateMO                      -2.745e+00  1.518e+00  -1.808  0.07139 .  
-    ## stateMS                      -5.432e-02  7.570e-01  -0.072  0.94283    
-    ## stateMT                       1.152e+00  1.875e+00   0.614  0.53956    
-    ## stateNC                       4.006e-01  4.942e-01   0.811  0.41811    
-    ## stateND                      -4.029e+00  1.736e+00  -2.321  0.02083 *  
-    ## stateNE                      -1.878e+00  1.508e+00  -1.245  0.21392    
-    ## stateNH                      -1.131e+00  1.401e+00  -0.807  0.41997    
-    ## stateNJ                      -6.382e-01  1.467e+00  -0.435  0.66387    
-    ## stateNM                       3.534e+00  1.779e+00   1.987  0.04767 *  
-    ## stateNV                       3.731e+00  1.692e+00   2.205  0.02804 *  
-    ## stateNY                      -1.080e+00  1.394e+00  -0.775  0.43881    
-    ## stateOH                      -3.479e+00  1.476e+00  -2.357  0.01893 *  
-    ## stateOK                       9.963e-01  6.923e-01   1.439  0.15093    
-    ## stateOR                       3.436e+00  1.588e+00   2.164  0.03109 *  
-    ## statePA                      -1.956e+00  1.396e+00  -1.401  0.16196    
-    ## stateRI                      -3.838e-01  1.493e+00  -0.257  0.79726    
-    ## stateSC                       1.054e+00  5.293e-01   1.991  0.04721 *  
-    ## stateSD                      -3.127e+00  1.801e+00  -1.736  0.08332 .  
-    ## stateTN                       1.393e-01  5.629e-01   0.247  0.80470    
-    ## stateTX                       1.001e+00  4.682e-01   2.138  0.03315 *  
-    ## stateUT                       2.629e+00  1.430e+00   1.838  0.06684 .  
-    ## stateVA                      -4.577e-01  5.953e-01  -0.769  0.44249    
-    ## stateVT                      -1.398e+00  1.669e+00  -0.838  0.40271    
-    ## stateWA                       3.223e+00  1.530e+00   2.107  0.03579 *  
-    ## stateWI                      -2.424e+00  1.494e+00  -1.622  0.10554    
-    ## stateWV                      -8.052e-01  1.164e+00  -0.692  0.48942    
-    ## pop18                         6.819e-02  2.077e-02   3.283  0.00113 ** 
-    ## pop65                         2.669e-02  4.985e-02   0.535  0.59269    
-    ## hsgrad                       -1.232e-02  1.771e-02  -0.696  0.48693    
-    ## poverty                       9.869e-02  5.674e-02   1.739  0.08280 .  
-    ## unemp                         3.802e-02  4.490e-02   0.847  0.39761    
-    ## pcincome                      7.361e-05  4.031e-05   1.826  0.06866 .  
-    ## pop_den                       1.570e-04  4.843e-05   3.243  0.00129 ** 
-    ## pbeds                         2.126e+02  4.058e+01   5.238 2.72e-07 ***
-    ## pop65:regionNorth_Central     1.660e-02  7.498e-02   0.221  0.82489    
-    ## pop65:regionSouth            -5.970e-02  5.223e-02  -1.143  0.25380    
-    ## pop65:regionWest             -9.876e-02  7.513e-02  -1.315  0.18947    
-    ## poverty:regionNorth_Central   7.827e-02  6.944e-02   1.127  0.26044    
-    ## poverty:regionSouth          -1.501e-02  5.792e-02  -0.259  0.79559    
-    ## poverty:regionWest           -5.217e-02  7.175e-02  -0.727  0.46760    
-    ## pcincome:regionNorth_Central  8.879e-05  5.945e-05   1.493  0.13616    
-    ## pcincome:regionSouth          5.270e-05  4.884e-05   1.079  0.28126    
-    ## pcincome:regionWest          -4.490e-05  5.754e-05  -0.780  0.43566    
-    ## ---
-    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-    ## 
-    ## Residual standard error: 1.082 on 374 degrees of freedom
-    ## Multiple R-squared:  0.6435, Adjusted R-squared:  0.5825 
-    ## F-statistic: 10.55 on 64 and 374 DF,  p-value: < 2.2e-16
-
-``` r
-# No state 
-step2 = update(step1, . ~ . -state)
-summary(step2)
-```
-
-    ## 
-    ## Call:
-    ## lm(formula = sqrt_CRM_1000 ~ pop18 + pop65 + hsgrad + poverty + 
-    ##     unemp + pcincome + pop_den + pbeds + pop65:region + poverty:region + 
-    ##     pcincome:region, data = new_cdi)
-    ## 
-    ## Residuals:
-    ##     Min      1Q  Median      3Q     Max 
-    ## -4.3170 -0.6585 -0.0072  0.7648  4.1540 
-    ## 
-    ## Coefficients:
-    ##                                Estimate Std. Error t value Pr(>|t|)    
-    ## (Intercept)                   2.199e+00  1.442e+00   1.524  0.12815    
-    ## pop18                         5.083e-02  1.979e-02   2.569  0.01054 *  
-    ## pop65                        -8.189e-02  4.375e-02  -1.872  0.06193 .  
-    ## hsgrad                        2.833e-03  1.502e-02   0.189  0.85043    
-    ## poverty                       1.197e-01  5.261e-02   2.276  0.02335 *  
-    ## unemp                         3.354e-02  3.616e-02   0.927  0.35423    
-    ## pcincome                      7.492e-05  2.618e-05   2.862  0.00442 ** 
-    ## pop_den                       1.284e-04  4.674e-05   2.746  0.00629 ** 
-    ## pbeds                         1.923e+02  3.878e+01   4.960 1.02e-06 ***
-    ## pop65:regionNorth_Central     2.896e-03  6.677e-02   0.043  0.96542    
-    ## pop65:regionSouth             9.505e-02  4.357e-02   2.181  0.02971 *  
-    ## pop65:regionWest              7.350e-02  6.266e-02   1.173  0.24150    
-    ## poverty:regionNorth_Central   7.200e-02  6.354e-02   1.133  0.25784    
-    ## poverty:regionSouth          -9.364e-03  4.846e-02  -0.193  0.84686    
-    ## poverty:regionWest            1.965e-02  5.687e-02   0.346  0.72989    
-    ## pcincome:regionNorth_Central  1.976e-06  3.001e-05   0.066  0.94753    
-    ## pcincome:regionSouth          3.820e-05  2.346e-05   1.628  0.10419    
-    ## pcincome:regionWest           2.633e-05  2.910e-05   0.905  0.36612    
-    ## ---
-    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-    ## 
-    ## Residual standard error: 1.187 on 421 degrees of freedom
-    ## Multiple R-squared:  0.5176, Adjusted R-squared:  0.4981 
-    ## F-statistic: 26.57 on 17 and 421 DF,  p-value: < 2.2e-16
-
-``` r
-# No pop65
-step3 = update(step2, . ~ . -pop65 * region)
-summary(step3)
 ```
 
     ## 
@@ -1186,9 +925,9 @@ summary(step3)
     ## F-statistic: 34.04 on 13 and 425 DF,  p-value: < 2.2e-16
 
 ``` r
-# No pdocs
-step4 = update(step3, . ~ . -hsgrad)
-summary(step4)
+# No hsgrad
+step2 = update(step1, . ~ . -hsgrad)
+summary(step2)
 ```
 
     ## 
@@ -1223,9 +962,9 @@ summary(step4)
     ## F-statistic: 36.95 on 12 and 426 DF,  p-value: < 2.2e-16
 
 ``` r
-# No pop18
-step5 = update(step4, . ~ . -pcincome * region)
-summary(step5)
+# No pcincome * region
+step3 = update(step2, . ~ . -pcincome * region)
+summary(step3)
 ```
 
     ## 
@@ -1257,8 +996,8 @@ summary(step5)
 
 ``` r
 # No unemp
-step6 = update(step5, . ~ . -unemp)
-summary(step6)
+step4 = update(step3, . ~ . -unemp)
+summary(step4)
 ```
 
     ## 
@@ -1328,260 +1067,127 @@ summary(multi_fit_back1)
 step(mult.fit_inter, direction = 'backward')
 ```
 
-    ## Start:  AIC=128.96
-    ## sqrt_CRM_1000 ~ state + pop18 + pop65 + hsgrad + poverty + unemp + 
-    ##     pcincome + region + pop_den + pbeds + pop65 * region + poverty * 
-    ##     region + pcincome * region
+    ## Start:  AIC=153.99
+    ## sqrt_CRM_1000 ~ pop18 + pop65 + hsgrad + poverty + unemp + pcincome + 
+    ##     region + pop_den + pbeds + pop65 * region + poverty * region + 
+    ##     pcincome * region
     ## 
     ##                   Df Sum of Sq    RSS    AIC
-    ## - pop65:region     3     3.860 441.82 126.81
-    ## - hsgrad           1     0.567 438.53 127.53
-    ## - poverty:region   3     4.676 442.64 127.62
-    ## - unemp            1     0.840 438.80 127.80
-    ## <none>                         437.96 128.96
-    ## - pcincome:region  3     6.134 444.09 129.07
-    ## - pop_den          1    12.312 450.27 139.13
-    ## - pop18            1    12.619 450.58 139.43
-    ## - state           44   128.608 566.57 153.99
-    ## - pbeds            1    32.126 470.09 158.03
+    ## - pop65:region     3     3.169 569.74 150.44
+    ## - hsgrad           1     0.043 566.61 152.02
+    ## - unemp            1     1.914 568.48 153.47
+    ## <none>                         566.57 153.99
+    ## - pop_den          1     7.251 573.82 157.57
+    ## - pcincome:region  3    13.710 580.28 158.49
+    ## - poverty:region   3    13.823 580.39 158.57
+    ## - pop18            1    15.335 581.90 163.71
+    ## - pbeds            1    32.074 598.64 176.16
     ## 
-    ## Step:  AIC=126.81
-    ## sqrt_CRM_1000 ~ state + pop18 + pop65 + hsgrad + poverty + unemp + 
-    ##     pcincome + region + pop_den + pbeds + poverty:region + pcincome:region
-    ## 
-    ##                   Df Sum of Sq    RSS    AIC
-    ## - hsgrad           1     0.704 442.52 125.51
-    ## - unemp            1     1.120 442.94 125.92
-    ## - pop65            1     1.220 443.04 126.02
-    ## <none>                         441.82 126.81
-    ## - pcincome:region  3     6.109 447.93 126.84
-    ## - poverty:region   3    10.213 452.03 130.84
-    ## - pop_den          1    11.217 453.04 135.82
-    ## - pop18            1    12.269 454.09 136.84
-    ## - state           44   127.917 569.74 150.44
-    ## - pbeds            1    33.838 475.66 157.21
-    ## 
-    ## Step:  AIC=125.51
-    ## sqrt_CRM_1000 ~ state + pop18 + pop65 + poverty + unemp + pcincome + 
+    ## Step:  AIC=150.44
+    ## sqrt_CRM_1000 ~ pop18 + pop65 + hsgrad + poverty + unemp + pcincome + 
     ##     region + pop_den + pbeds + poverty:region + pcincome:region
     ## 
     ##                   Df Sum of Sq    RSS    AIC
-    ## - pop65            1     1.046 443.57 124.55
-    ## - pcincome:region  3     5.750 448.28 125.18
-    ## - unemp            1     1.951 444.48 125.44
-    ## <none>                         442.52 125.51
-    ## - poverty:region   3     9.785 452.31 129.11
-    ## - pop18            1    11.617 454.14 134.89
-    ## - pop_den          1    13.632 456.16 136.83
-    ## - state           44   127.320 569.84 148.52
-    ## - pbeds            1    33.728 476.25 155.76
+    ## - pop65            1     0.045 569.78 148.47
+    ## - hsgrad           1     0.107 569.84 148.52
+    ## - unemp            1     2.345 572.08 150.24
+    ## <none>                         569.74 150.44
+    ## - pop_den          1     7.363 577.10 154.07
+    ## - pcincome:region  3    14.316 584.05 155.33
+    ## - poverty:region   3    18.180 587.92 158.23
+    ## - pop18            1    17.207 586.95 161.50
+    ## - pbeds            1    31.881 601.62 172.34
     ## 
-    ## Step:  AIC=124.55
-    ## sqrt_CRM_1000 ~ state + pop18 + poverty + unemp + pcincome + 
+    ## Step:  AIC=148.47
+    ## sqrt_CRM_1000 ~ pop18 + hsgrad + poverty + unemp + pcincome + 
     ##     region + pop_den + pbeds + poverty:region + pcincome:region
     ## 
     ##                   Df Sum of Sq    RSS    AIC
-    ## - pcincome:region  3     5.812 449.38 124.26
-    ## <none>                         443.57 124.55
-    ## - unemp            1     2.057 445.63 124.58
-    ## - poverty:region   3     9.617 453.19 127.96
-    ## - pop_den          1    13.034 456.61 135.26
-    ## - state           44   126.327 569.90 146.56
-    ## - pop18            1    25.495 469.07 147.08
-    ## - pbeds            1    33.401 476.97 154.42
+    ## - hsgrad           1     0.115 569.90 146.56
+    ## - unemp            1     2.428 572.21 148.34
+    ## <none>                         569.78 148.47
+    ## - pop_den          1     7.490 577.27 152.21
+    ## - pcincome:region  3    14.280 584.06 153.34
+    ## - poverty:region   3    18.329 588.11 156.37
+    ## - pop18            1    24.342 594.13 164.84
+    ## - pbeds            1    36.617 606.40 173.81
     ## 
-    ## Step:  AIC=124.26
-    ## sqrt_CRM_1000 ~ state + pop18 + poverty + unemp + pcincome + 
-    ##     region + pop_den + pbeds + poverty:region
+    ## Step:  AIC=146.56
+    ## sqrt_CRM_1000 ~ pop18 + poverty + unemp + pcincome + region + 
+    ##     pop_den + pbeds + poverty:region + pcincome:region
     ## 
-    ##                  Df Sum of Sq    RSS    AIC
-    ## <none>                        449.38 124.26
-    ## - unemp           1     2.145 451.53 124.35
-    ## - poverty:region  3     7.630 457.01 125.65
-    ## - pop_den         1    12.016 461.40 133.85
-    ## - pcincome        1    19.434 468.82 140.85
-    ## - pop18           1    25.247 474.63 146.26
-    ## - state          44   134.735 584.12 151.38
-    ## - pbeds           1    35.779 485.16 155.89
+    ##                   Df Sum of Sq    RSS    AIC
+    ## <none>                         569.90 146.56
+    ## - unemp            1     3.073 572.97 146.92
+    ## - pop_den          1     8.337 578.23 150.94
+    ## - pcincome:region  3    14.220 584.12 151.38
+    ## - poverty:region   3    18.214 588.11 154.37
+    ## - pop18            1    27.317 597.22 165.12
+    ## - pbeds            1    36.658 606.56 171.93
 
     ## 
     ## Call:
-    ## lm(formula = sqrt_CRM_1000 ~ state + pop18 + poverty + unemp + 
-    ##     pcincome + region + pop_den + pbeds + poverty:region, data = new_cdi)
+    ## lm(formula = sqrt_CRM_1000 ~ pop18 + poverty + unemp + pcincome + 
+    ##     region + pop_den + pbeds + poverty:region + pcincome:region, 
+    ##     data = new_cdi)
     ## 
     ## Coefficients:
-    ##                 (Intercept)                      stateAR  
-    ##                   1.772e+00                    1.088e+00  
-    ##                     stateAZ                      stateCA  
-    ##                   5.794e-01                   -1.228e-01  
-    ##                     stateCO                      stateCT  
-    ##                   5.356e-01                   -2.006e+00  
-    ##                     stateDC                      stateDE  
-    ##                  -5.713e-01                   -9.167e-02  
-    ##                     stateFL                      stateGA  
-    ##                   1.119e+00                    1.078e+00  
-    ##                     stateHI                      stateID  
-    ##                   9.970e-01                   -1.395e-01  
-    ##                     stateIL                      stateIN  
-    ##                  -1.354e+00                   -2.005e+00  
-    ##                     stateKS                      stateKY  
-    ##                   5.714e-01                   -6.745e-01  
-    ##                     stateLA                      stateMA  
-    ##                  -2.136e-02                   -2.448e+00  
-    ##                     stateMD                      stateME  
-    ##                  -1.029e-01                   -1.458e+00  
-    ##                     stateMI                      stateMN  
-    ##                  -8.206e-01                   -1.607e+00  
-    ##                     stateMO                      stateMS  
-    ##                  -1.274e+00                   -1.012e-01  
-    ##                     stateMT                      stateNC  
-    ##                  -1.648e+00                    4.089e-01  
-    ##                     stateND                      stateNE  
-    ##                  -2.833e+00                   -6.048e-01  
-    ##                     stateNH                      stateNJ  
-    ##                  -1.778e+00                   -1.252e+00  
-    ##                     stateNM                      stateNV  
-    ##                   8.154e-01                    1.030e+00  
-    ##                     stateNY                      stateOH  
-    ##                  -1.676e+00                   -2.035e+00  
-    ##                     stateOK                      stateOR  
-    ##                   9.304e-01                    6.128e-01  
-    ##                     statePA                      stateRI  
-    ##                  -2.424e+00                   -8.645e-01  
-    ##                     stateSC                      stateSD  
-    ##                   1.075e+00                   -1.626e+00  
-    ##                     stateTN                      stateTX  
-    ##                   1.583e-01                    1.040e+00  
-    ##                     stateUT                      stateVA  
-    ##                   3.849e-01                   -3.245e-01  
-    ##                     stateVT                      stateWA  
-    ##                  -2.143e+00                    5.043e-01  
-    ##                     stateWI                      stateWV  
-    ##                  -9.426e-01                   -9.192e-01  
-    ##                       pop18                      poverty  
-    ##                   7.178e-02                    1.366e-01  
-    ##                       unemp                     pcincome  
-    ##                   5.703e-02                    9.626e-05  
-    ##         regionNorth_Central                  regionSouth  
-    ##                          NA                           NA  
-    ##                  regionWest                      pop_den  
-    ##                          NA                    1.446e-04  
-    ##                       pbeds  poverty:regionNorth_Central  
-    ##                   2.093e+02                    4.359e-02  
-    ##         poverty:regionSouth           poverty:regionWest  
-    ##                  -5.625e-02                   -3.729e-02
+    ##                  (Intercept)                         pop18  
+    ##                   -1.959e-01                     6.579e-02  
+    ##                      poverty                         unemp  
+    ##                    1.395e-01                     5.046e-02  
+    ##                     pcincome           regionNorth_Central  
+    ##                    1.163e-04                    -1.907e+00  
+    ##                  regionSouth                    regionWest  
+    ##                    3.016e+00                     4.231e+00  
+    ##                      pop_den                         pbeds  
+    ##                    1.112e-04                     1.870e+02  
+    ##  poverty:regionNorth_Central           poverty:regionSouth  
+    ##                    1.027e-01                    -5.264e-02  
+    ##           poverty:regionWest  pcincome:regionNorth_Central  
+    ##                   -8.552e-02                     1.067e-04  
+    ##         pcincome:regionSouth           pcincome:regionWest  
+    ##                   -3.133e-05                    -9.168e-05
 
 ``` r
-multi_fit_back2 = lm(sqrt_CRM_1000 ~ state + pop18 + poverty + unemp + pcincome + pop_den + pbeds + poverty * region, data = new_cdi)
+multi_fit_back2 = lm(sqrt_CRM_1000 ~ pop18 + poverty + unemp + pcincome + region + pop_den + pbeds + poverty * region, data = new_cdi)
 summary(multi_fit_back2)
 ```
 
     ## 
     ## Call:
-    ## lm(formula = sqrt_CRM_1000 ~ state + pop18 + poverty + unemp + 
-    ##     pcincome + pop_den + pbeds + poverty * region, data = new_cdi)
+    ## lm(formula = sqrt_CRM_1000 ~ pop18 + poverty + unemp + pcincome + 
+    ##     region + pop_den + pbeds + poverty * region, data = new_cdi)
     ## 
     ## Residuals:
     ##     Min      1Q  Median      3Q     Max 
-    ## -3.7689 -0.6149  0.0000  0.7061  3.3473 
+    ## -4.3667 -0.6859  0.0422  0.7399  3.9752 
     ## 
-    ## Coefficients: (3 not defined because of singularities)
+    ## Coefficients:
     ##                               Estimate Std. Error t value Pr(>|t|)    
-    ## (Intercept)                  1.772e+00  9.458e-01   1.874 0.061754 .  
-    ## stateAR                      1.088e+00  8.754e-01   1.243 0.214584    
-    ## stateAZ                      5.794e-01  8.288e-01   0.699 0.484889    
-    ## stateCA                     -1.228e-01  6.134e-01  -0.200 0.841462    
-    ## stateCO                      5.356e-01  6.872e-01   0.779 0.436232    
-    ## stateCT                     -2.006e+00  6.633e-01  -3.024 0.002665 ** 
-    ## stateDC                     -5.713e-01  1.226e+00  -0.466 0.641345    
-    ## stateDE                     -9.167e-02  9.495e-01  -0.097 0.923144    
-    ## stateFL                      1.119e+00  4.719e-01   2.371 0.018212 *  
-    ## stateGA                      1.078e+00  5.504e-01   1.959 0.050819 .  
-    ## stateHI                      9.970e-01  8.538e-01   1.168 0.243654    
-    ## stateID                     -1.395e-01  1.211e+00  -0.115 0.908343    
-    ## stateIL                     -1.354e+00  6.103e-01  -2.218 0.027130 *  
-    ## stateIN                     -2.005e+00  6.219e-01  -3.225 0.001370 ** 
-    ## stateKS                      5.714e-01  7.770e-01   0.735 0.462513    
-    ## stateKY                     -6.745e-01  7.529e-01  -0.896 0.370875    
-    ## stateLA                     -2.136e-02  5.559e-01  -0.038 0.969374    
-    ## stateMA                     -2.448e+00  6.791e-01  -3.604 0.000355 ***
-    ## stateMD                     -1.029e-01  5.690e-01  -0.181 0.856583    
-    ## stateME                     -1.458e+00  7.407e-01  -1.968 0.049783 *  
-    ## stateMI                     -8.206e-01  6.512e-01  -1.260 0.208379    
-    ## stateMN                     -1.607e+00  6.610e-01  -2.431 0.015531 *  
-    ## stateMO                     -1.274e+00  6.731e-01  -1.892 0.059202 .  
-    ## stateMS                     -1.012e-01  7.509e-01  -0.135 0.892814    
-    ## stateMT                     -1.648e+00  1.233e+00  -1.337 0.182101    
-    ## stateNC                      4.089e-01  4.903e-01   0.834 0.404867    
-    ## stateND                     -2.833e+00  1.214e+00  -2.333 0.020166 *  
-    ## stateNE                     -6.048e-01  8.176e-01  -0.740 0.459889    
-    ## stateNH                     -1.778e+00  7.533e-01  -2.360 0.018788 *  
-    ## stateNJ                     -1.252e+00  6.077e-01  -2.059 0.040136 *  
-    ## stateNM                      8.154e-01  1.090e+00   0.748 0.454907    
-    ## stateNV                      1.030e+00  9.380e-01   1.099 0.272643    
-    ## stateNY                     -1.676e+00  6.049e-01  -2.770 0.005879 ** 
-    ## stateOH                     -2.035e+00  6.154e-01  -3.308 0.001030 ** 
-    ## stateOK                      9.304e-01  6.829e-01   1.362 0.173867    
-    ## stateOR                      6.128e-01  7.160e-01   0.856 0.392572    
-    ## statePA                     -2.424e+00  5.965e-01  -4.063 5.88e-05 ***
-    ## stateRI                     -8.645e-01  8.264e-01  -1.046 0.296177    
-    ## stateSC                      1.075e+00  5.276e-01   2.037 0.042334 *  
-    ## stateSD                     -1.626e+00  1.200e+00  -1.355 0.176344    
-    ## stateTN                      1.583e-01  5.637e-01   0.281 0.778994    
-    ## stateTX                      1.040e+00  4.655e-01   2.233 0.026097 *  
-    ## stateUT                      3.849e-01  7.909e-01   0.487 0.626755    
-    ## stateVA                     -3.245e-01  5.815e-01  -0.558 0.577166    
-    ## stateVT                     -2.143e+00  1.208e+00  -1.774 0.076827 .  
-    ## stateWA                      5.043e-01  6.584e-01   0.766 0.444209    
-    ## stateWI                     -9.426e-01  6.220e-01  -1.515 0.130481    
-    ## stateWV                     -9.192e-01  1.164e+00  -0.790 0.430001    
-    ## pop18                        7.178e-02  1.550e-02   4.633 4.96e-06 ***
-    ## poverty                      1.366e-01  4.836e-02   2.824 0.004991 ** 
-    ## unemp                        5.703e-02  4.223e-02   1.350 0.177662    
-    ## pcincome                     9.626e-05  2.368e-05   4.065 5.85e-05 ***
-    ## pop_den                      1.446e-04  4.525e-05   3.196 0.001510 ** 
-    ## pbeds                        2.093e+02  3.795e+01   5.515 6.44e-08 ***
-    ## regionNorth_Central                 NA         NA      NA       NA    
-    ## regionSouth                         NA         NA      NA       NA    
-    ## regionWest                          NA         NA      NA       NA    
-    ## poverty:regionNorth_Central  4.359e-02  5.194e-02   0.839 0.401787    
-    ## poverty:regionSouth         -5.625e-02  4.556e-02  -1.235 0.217730    
-    ## poverty:regionWest          -3.729e-02  5.391e-02  -0.692 0.489612    
+    ## (Intercept)                  3.953e-01  8.684e-01   0.455  0.64915    
+    ## pop18                        6.166e-02  1.465e-02   4.209 3.13e-05 ***
+    ## poverty                      1.252e-01  4.871e-02   2.570  0.01050 *  
+    ## unemp                        4.287e-02  3.351e-02   1.279  0.20154    
+    ## pcincome                     9.994e-05  2.202e-05   4.539 7.36e-06 ***
+    ## regionNorth_Central          3.237e-01  4.115e-01   0.787  0.43186    
+    ## regionSouth                  2.246e+00  3.633e-01   6.182 1.48e-09 ***
+    ## regionWest                   1.930e+00  4.509e-01   4.280 2.31e-05 ***
+    ## pop_den                      1.162e-04  4.483e-05   2.592  0.00987 ** 
+    ## pbeds                        1.876e+02  3.604e+01   5.204 3.04e-07 ***
+    ## poverty:regionNorth_Central  6.520e-02  5.253e-02   1.241  0.21523    
+    ## poverty:regionSouth         -3.091e-02  4.563e-02  -0.677  0.49859    
+    ## poverty:regionWest          -1.718e-02  5.327e-02  -0.323  0.74721    
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
-    ## Residual standard error: 1.085 on 382 degrees of freedom
-    ## Multiple R-squared:  0.6342, Adjusted R-squared:  0.5806 
-    ## F-statistic: 11.83 on 56 and 382 DF,  p-value: < 2.2e-16
+    ## Residual standard error: 1.171 on 426 degrees of freedom
+    ## Multiple R-squared:  0.5246, Adjusted R-squared:  0.5112 
+    ## F-statistic: 39.17 on 12 and 426 DF,  p-value: < 2.2e-16
 
 ``` r
-# multi_fit_back2: Adjusted R-squared is 0.5806 and AIC=124.26
+# multi_fit_back2: Adjusted R-squared is 0.5112 and AIC=146.56
 ```
-
-# Diagnostic Plots for Backward Elimination 1
-
-``` r
-par(mfrow=c(2,2))
-plot(multi_fit_back1)
-```
-
-![](data_exploration_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
-
-# Diagnostic Plots for Backward Elimination 2
-
-``` r
-par(mfrow=c(2,2))
-plot(multi_fit_back2)
-```
-
-    ## Warning: not plotting observations with leverage one:
-    ##   72, 231, 338, 355, 387, 428
-
-    ## Warning in sqrt(crit * p * (1 - hh)/hh): NaNs produced
-
-    ## Warning in sqrt(crit * p * (1 - hh)/hh): NaNs produced
-
-![](data_exploration_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->
 
 Forward Selection
 
@@ -1589,600 +1195,224 @@ Forward Selection
 step(mult.fit_inter, direction = 'forward')
 ```
 
-    ## Start:  AIC=128.96
-    ## sqrt_CRM_1000 ~ state + pop18 + pop65 + hsgrad + poverty + unemp + 
-    ##     pcincome + region + pop_den + pbeds + pop65 * region + poverty * 
-    ##     region + pcincome * region
+    ## Start:  AIC=153.99
+    ## sqrt_CRM_1000 ~ pop18 + pop65 + hsgrad + poverty + unemp + pcincome + 
+    ##     region + pop_den + pbeds + pop65 * region + poverty * region + 
+    ##     pcincome * region
 
     ## 
     ## Call:
-    ## lm(formula = sqrt_CRM_1000 ~ state + pop18 + pop65 + hsgrad + 
-    ##     poverty + unemp + pcincome + region + pop_den + pbeds + pop65 * 
-    ##     region + poverty * region + pcincome * region, data = new_cdi)
+    ## lm(formula = sqrt_CRM_1000 ~ pop18 + pop65 + hsgrad + poverty + 
+    ##     unemp + pcincome + region + pop_den + pbeds + pop65 * region + 
+    ##     poverty * region + pcincome * region, data = new_cdi)
     ## 
     ## Coefficients:
-    ##                  (Intercept)                       stateAR  
-    ##                    2.715e+00                     1.101e+00  
-    ##                      stateAZ                       stateCA  
-    ##                    3.530e+00                     2.781e+00  
-    ##                      stateCO                       stateCT  
-    ##                    3.223e+00                    -1.393e+00  
-    ##                      stateDC                       stateDE  
-    ##                   -8.244e-01                     5.276e-01  
-    ##                      stateFL                       stateGA  
-    ##                    1.400e+00                     9.598e-01  
-    ##                      stateHI                       stateID  
-    ##                    3.662e+00                     2.504e+00  
-    ##                      stateIL                       stateIN  
-    ##                   -2.904e+00                    -3.441e+00  
-    ##                      stateKS                       stateKY  
-    ##                   -9.754e-01                    -7.110e-01  
-    ##                      stateLA                       stateMA  
-    ##                   -5.732e-02                    -1.783e+00  
-    ##                      stateMD                       stateME  
-    ##                   -2.424e-01                    -8.730e-01  
-    ##                      stateMI                       stateMN  
-    ##                   -2.214e+00                    -3.051e+00  
-    ##                      stateMO                       stateMS  
-    ##                   -2.745e+00                    -5.432e-02  
-    ##                      stateMT                       stateNC  
-    ##                    1.152e+00                     4.006e-01  
-    ##                      stateND                       stateNE  
-    ##                   -4.029e+00                    -1.878e+00  
-    ##                      stateNH                       stateNJ  
-    ##                   -1.131e+00                    -6.382e-01  
-    ##                      stateNM                       stateNV  
-    ##                    3.534e+00                     3.731e+00  
-    ##                      stateNY                       stateOH  
-    ##                   -1.080e+00                    -3.479e+00  
-    ##                      stateOK                       stateOR  
-    ##                    9.963e-01                     3.436e+00  
-    ##                      statePA                       stateRI  
-    ##                   -1.956e+00                    -3.838e-01  
-    ##                      stateSC                       stateSD  
-    ##                    1.054e+00                    -3.127e+00  
-    ##                      stateTN                       stateTX  
-    ##                    1.393e-01                     1.001e+00  
-    ##                      stateUT                       stateVA  
-    ##                    2.629e+00                    -4.577e-01  
-    ##                      stateVT                       stateWA  
-    ##                   -1.398e+00                     3.223e+00  
-    ##                      stateWI                       stateWV  
-    ##                   -2.424e+00                    -8.052e-01  
-    ##                        pop18                         pop65  
-    ##                    6.819e-02                     2.669e-02  
-    ##                       hsgrad                       poverty  
-    ##                   -1.232e-02                     9.869e-02  
-    ##                        unemp                      pcincome  
-    ##                    3.802e-02                     7.361e-05  
-    ##          regionNorth_Central                   regionSouth  
-    ##                           NA                            NA  
-    ##                   regionWest                       pop_den  
-    ##                           NA                     1.570e-04  
-    ##                        pbeds     pop65:regionNorth_Central  
-    ##                    2.126e+02                     1.660e-02  
-    ##            pop65:regionSouth              pop65:regionWest  
-    ##                   -5.970e-02                    -9.876e-02  
-    ##  poverty:regionNorth_Central           poverty:regionSouth  
-    ##                    7.827e-02                    -1.501e-02  
-    ##           poverty:regionWest  pcincome:regionNorth_Central  
-    ##                   -5.217e-02                     8.879e-05  
-    ##         pcincome:regionSouth           pcincome:regionWest  
-    ##                    5.270e-05                    -4.490e-05
+    ##                  (Intercept)                         pop18  
+    ##                    5.439e-01                     6.689e-02  
+    ##                        pop65                        hsgrad  
+    ##                   -4.562e-02                    -2.708e-03  
+    ##                      poverty                         unemp  
+    ##                    1.555e-01                     4.236e-02  
+    ##                     pcincome           regionNorth_Central  
+    ##                    1.176e-04                    -2.569e+00  
+    ##                  regionSouth                    regionWest  
+    ##                    2.309e+00                     4.080e+00  
+    ##                      pop_den                         pbeds  
+    ##                    1.073e-04                     1.858e+02  
+    ##    pop65:regionNorth_Central             pop65:regionSouth  
+    ##                    5.891e-02                     5.955e-02  
+    ##             pop65:regionWest   poverty:regionNorth_Central  
+    ##                    5.574e-03                     8.235e-02  
+    ##          poverty:regionSouth            poverty:regionWest  
+    ##                   -6.764e-02                    -9.547e-02  
+    ## pcincome:regionNorth_Central          pcincome:regionSouth  
+    ##                    1.079e-04                    -3.148e-05  
+    ##          pcincome:regionWest  
+    ##                   -8.996e-05
 
 ``` r
-multi_fit_forward = lm(sqrt_CRM_1000 ~ state + pop18 + pop65 + hsgrad + poverty + unemp + pcincome + region + pop_den + pbeds + pop65 * region + poverty * region + pcincome * region, data = new_cdi)
+multi_fit_forward = lm(sqrt_CRM_1000 ~ pop18 + pop65 + hsgrad + poverty + unemp + pcincome + region + pop_den + pbeds + pop65 * region + poverty * region + pcincome * region, data = new_cdi)
 summary(multi_fit_forward)
 ```
 
     ## 
     ## Call:
-    ## lm(formula = sqrt_CRM_1000 ~ state + pop18 + pop65 + hsgrad + 
-    ##     poverty + unemp + pcincome + region + pop_den + pbeds + pop65 * 
-    ##     region + poverty * region + pcincome * region, data = new_cdi)
+    ## lm(formula = sqrt_CRM_1000 ~ pop18 + pop65 + hsgrad + poverty + 
+    ##     unemp + pcincome + region + pop_den + pbeds + pop65 * region + 
+    ##     poverty * region + pcincome * region, data = new_cdi)
     ## 
     ## Residuals:
     ##     Min      1Q  Median      3Q     Max 
-    ## -3.6958 -0.6257 -0.0121  0.6979  3.3319 
+    ## -4.2073 -0.6863  0.0669  0.7199  3.9311 
     ## 
-    ## Coefficients: (3 not defined because of singularities)
+    ## Coefficients:
     ##                                Estimate Std. Error t value Pr(>|t|)    
-    ## (Intercept)                   2.715e+00  1.668e+00   1.627  0.10452    
-    ## stateAR                       1.101e+00  8.742e-01   1.260  0.20846    
-    ## stateAZ                       3.530e+00  1.683e+00   2.097  0.03664 *  
-    ## stateCA                       2.781e+00  1.609e+00   1.729  0.08470 .  
-    ## stateCO                       3.223e+00  1.551e+00   2.079  0.03832 *  
-    ## stateCT                      -1.393e+00  1.461e+00  -0.953  0.34118    
-    ## stateDC                      -8.244e-01  1.252e+00  -0.659  0.51056    
-    ## stateDE                       5.276e-01  1.516e+00   0.348  0.72811    
-    ## stateFL                       1.400e+00  5.087e-01   2.752  0.00622 ** 
-    ## stateGA                       9.598e-01  5.543e-01   1.731  0.08421 .  
-    ## stateHI                       3.662e+00  1.627e+00   2.251  0.02498 *  
-    ## stateID                       2.504e+00  1.818e+00   1.377  0.16921    
-    ## stateIL                      -2.904e+00  1.546e+00  -1.878  0.06114 .  
-    ## stateIN                      -3.441e+00  1.472e+00  -2.337  0.01995 *  
-    ## stateKS                      -9.754e-01  1.617e+00  -0.603  0.54664    
-    ## stateKY                      -7.110e-01  7.518e-01  -0.946  0.34491    
-    ## stateLA                      -5.732e-02  5.639e-01  -0.102  0.91909    
-    ## stateMA                      -1.783e+00  1.493e+00  -1.194  0.23334    
-    ## stateMD                      -2.424e-01  5.774e-01  -0.420  0.67486    
-    ## stateME                      -8.730e-01  1.409e+00  -0.620  0.53595    
-    ## stateMI                      -2.214e+00  1.520e+00  -1.457  0.14604    
-    ## stateMN                      -3.051e+00  1.521e+00  -2.006  0.04561 *  
-    ## stateMO                      -2.745e+00  1.518e+00  -1.808  0.07139 .  
-    ## stateMS                      -5.432e-02  7.570e-01  -0.072  0.94283    
-    ## stateMT                       1.152e+00  1.875e+00   0.614  0.53956    
-    ## stateNC                       4.006e-01  4.942e-01   0.811  0.41811    
-    ## stateND                      -4.029e+00  1.736e+00  -2.321  0.02083 *  
-    ## stateNE                      -1.878e+00  1.508e+00  -1.245  0.21392    
-    ## stateNH                      -1.131e+00  1.401e+00  -0.807  0.41997    
-    ## stateNJ                      -6.382e-01  1.467e+00  -0.435  0.66387    
-    ## stateNM                       3.534e+00  1.779e+00   1.987  0.04767 *  
-    ## stateNV                       3.731e+00  1.692e+00   2.205  0.02804 *  
-    ## stateNY                      -1.080e+00  1.394e+00  -0.775  0.43881    
-    ## stateOH                      -3.479e+00  1.476e+00  -2.357  0.01893 *  
-    ## stateOK                       9.963e-01  6.923e-01   1.439  0.15093    
-    ## stateOR                       3.436e+00  1.588e+00   2.164  0.03109 *  
-    ## statePA                      -1.956e+00  1.396e+00  -1.401  0.16196    
-    ## stateRI                      -3.838e-01  1.493e+00  -0.257  0.79726    
-    ## stateSC                       1.054e+00  5.293e-01   1.991  0.04721 *  
-    ## stateSD                      -3.127e+00  1.801e+00  -1.736  0.08332 .  
-    ## stateTN                       1.393e-01  5.629e-01   0.247  0.80470    
-    ## stateTX                       1.001e+00  4.682e-01   2.138  0.03315 *  
-    ## stateUT                       2.629e+00  1.430e+00   1.838  0.06684 .  
-    ## stateVA                      -4.577e-01  5.953e-01  -0.769  0.44249    
-    ## stateVT                      -1.398e+00  1.669e+00  -0.838  0.40271    
-    ## stateWA                       3.223e+00  1.530e+00   2.107  0.03579 *  
-    ## stateWI                      -2.424e+00  1.494e+00  -1.622  0.10554    
-    ## stateWV                      -8.052e-01  1.164e+00  -0.692  0.48942    
-    ## pop18                         6.819e-02  2.077e-02   3.283  0.00113 ** 
-    ## pop65                         2.669e-02  4.985e-02   0.535  0.59269    
-    ## hsgrad                       -1.232e-02  1.771e-02  -0.696  0.48693    
-    ## poverty                       9.869e-02  5.674e-02   1.739  0.08280 .  
-    ## unemp                         3.802e-02  4.490e-02   0.847  0.39761    
-    ## pcincome                      7.361e-05  4.031e-05   1.826  0.06866 .  
-    ## regionNorth_Central                  NA         NA      NA       NA    
-    ## regionSouth                          NA         NA      NA       NA    
-    ## regionWest                           NA         NA      NA       NA    
-    ## pop_den                       1.570e-04  4.843e-05   3.243  0.00129 ** 
-    ## pbeds                         2.126e+02  4.058e+01   5.238 2.72e-07 ***
-    ## pop65:regionNorth_Central     1.660e-02  7.498e-02   0.221  0.82489    
-    ## pop65:regionSouth            -5.970e-02  5.223e-02  -1.143  0.25380    
-    ## pop65:regionWest             -9.876e-02  7.513e-02  -1.315  0.18947    
-    ## poverty:regionNorth_Central   7.827e-02  6.944e-02   1.127  0.26044    
-    ## poverty:regionSouth          -1.501e-02  5.792e-02  -0.259  0.79559    
-    ## poverty:regionWest           -5.217e-02  7.175e-02  -0.727  0.46760    
-    ## pcincome:regionNorth_Central  8.879e-05  5.945e-05   1.493  0.13616    
-    ## pcincome:regionSouth          5.270e-05  4.884e-05   1.079  0.28126    
-    ## pcincome:regionWest          -4.490e-05  5.754e-05  -0.780  0.43566    
+    ## (Intercept)                   5.439e-01  1.755e+00   0.310  0.75676    
+    ## pop18                         6.689e-02  1.989e-02   3.364  0.00084 ***
+    ## pop65                        -4.562e-02  4.730e-02  -0.964  0.33539    
+    ## hsgrad                       -2.708e-03  1.522e-02  -0.178  0.85889    
+    ## poverty                       1.555e-01  5.726e-02   2.715  0.00690 ** 
+    ## unemp                         4.236e-02  3.564e-02   1.188  0.23535    
+    ## pcincome                      1.176e-04  3.619e-05   3.250  0.00125 ** 
+    ## regionNorth_Central          -2.569e+00  1.588e+00  -1.618  0.10637    
+    ## regionSouth                   2.309e+00  1.281e+00   1.802  0.07226 .  
+    ## regionWest                    4.080e+00  1.579e+00   2.584  0.01010 *  
+    ## pop_den                       1.073e-04  4.637e-05   2.313  0.02121 *  
+    ## pbeds                         1.858e+02  3.819e+01   4.864 1.63e-06 ***
+    ## pop65:regionNorth_Central     5.891e-02  7.336e-02   0.803  0.42241    
+    ## pop65:regionSouth             5.955e-02  4.772e-02   1.248  0.21277    
+    ## pop65:regionWest              5.574e-03  6.742e-02   0.083  0.93415    
+    ## poverty:regionNorth_Central   8.235e-02  6.982e-02   1.179  0.23888    
+    ## poverty:regionSouth          -6.764e-02  5.769e-02  -1.172  0.24167    
+    ## poverty:regionWest           -9.547e-02  7.071e-02  -1.350  0.17773    
+    ## pcincome:regionNorth_Central  1.079e-04  5.810e-05   1.857  0.06407 .  
+    ## pcincome:regionSouth         -3.148e-05  4.493e-05  -0.700  0.48401    
+    ## pcincome:regionWest          -8.996e-05  5.265e-05  -1.709  0.08822 .  
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
-    ## Residual standard error: 1.082 on 374 degrees of freedom
-    ## Multiple R-squared:  0.6435, Adjusted R-squared:  0.5825 
-    ## F-statistic: 10.55 on 64 and 374 DF,  p-value: < 2.2e-16
+    ## Residual standard error: 1.164 on 418 degrees of freedom
+    ## Multiple R-squared:  0.5389, Adjusted R-squared:  0.5168 
+    ## F-statistic: 24.42 on 20 and 418 DF,  p-value: < 2.2e-16
 
 ``` r
-# our Adjusted R-squared is 0.5825 and AIC=128.96
+# our Adjusted R-squared is 0.5168 and AIC=153.99
 ```
 
-# Diagnostic Plots for Forward Selection
-
-``` r
-par(mfrow=c(2,2))
-plot(multi_fit_forward)
-```
-
-    ## Warning: not plotting observations with leverage one:
-    ##   72, 231, 338, 355, 387, 428
-
-    ## Warning in sqrt(crit * p * (1 - hh)/hh): NaNs produced
-
-    ## Warning in sqrt(crit * p * (1 - hh)/hh): NaNs produced
-
-![](data_exploration_files/figure-gfm/unnamed-chunk-22-1.png)<!-- -->
-
-use both selection
+Use both selection
 
 ``` r
 step(mult.fit_inter, direction = 'both')
 ```
 
-    ## Start:  AIC=128.96
-    ## sqrt_CRM_1000 ~ state + pop18 + pop65 + hsgrad + poverty + unemp + 
-    ##     pcincome + region + pop_den + pbeds + pop65 * region + poverty * 
-    ##     region + pcincome * region
+    ## Start:  AIC=153.99
+    ## sqrt_CRM_1000 ~ pop18 + pop65 + hsgrad + poverty + unemp + pcincome + 
+    ##     region + pop_den + pbeds + pop65 * region + poverty * region + 
+    ##     pcincome * region
     ## 
     ##                   Df Sum of Sq    RSS    AIC
-    ## - pop65:region     3     3.860 441.82 126.81
-    ## - hsgrad           1     0.567 438.53 127.53
-    ## - poverty:region   3     4.676 442.64 127.62
-    ## - unemp            1     0.840 438.80 127.80
-    ## <none>                         437.96 128.96
-    ## - pcincome:region  3     6.134 444.09 129.07
-    ## - pop_den          1    12.312 450.27 139.13
-    ## - pop18            1    12.619 450.58 139.43
-    ## - state           44   128.608 566.57 153.99
-    ## - pbeds            1    32.126 470.09 158.03
+    ## - pop65:region     3     3.169 569.74 150.44
+    ## - hsgrad           1     0.043 566.61 152.02
+    ## - unemp            1     1.914 568.48 153.47
+    ## <none>                         566.57 153.99
+    ## - pop_den          1     7.251 573.82 157.57
+    ## - pcincome:region  3    13.710 580.28 158.49
+    ## - poverty:region   3    13.823 580.39 158.57
+    ## - pop18            1    15.335 581.90 163.71
+    ## - pbeds            1    32.074 598.64 176.16
     ## 
-    ## Step:  AIC=126.81
-    ## sqrt_CRM_1000 ~ state + pop18 + pop65 + hsgrad + poverty + unemp + 
-    ##     pcincome + region + pop_den + pbeds + poverty:region + pcincome:region
-    ## 
-    ##                   Df Sum of Sq    RSS    AIC
-    ## - hsgrad           1     0.704 442.52 125.51
-    ## - unemp            1     1.120 442.94 125.92
-    ## - pop65            1     1.220 443.04 126.02
-    ## <none>                         441.82 126.81
-    ## - pcincome:region  3     6.109 447.93 126.84
-    ## + pop65:region     3     3.860 437.96 128.96
-    ## - poverty:region   3    10.213 452.03 130.84
-    ## - pop_den          1    11.217 453.04 135.82
-    ## - pop18            1    12.269 454.09 136.84
-    ## - state           44   127.917 569.74 150.44
-    ## - pbeds            1    33.838 475.66 157.21
-    ## 
-    ## Step:  AIC=125.51
-    ## sqrt_CRM_1000 ~ state + pop18 + pop65 + poverty + unemp + pcincome + 
+    ## Step:  AIC=150.44
+    ## sqrt_CRM_1000 ~ pop18 + pop65 + hsgrad + poverty + unemp + pcincome + 
     ##     region + pop_den + pbeds + poverty:region + pcincome:region
     ## 
     ##                   Df Sum of Sq    RSS    AIC
-    ## - pop65            1     1.046 443.57 124.55
-    ## - pcincome:region  3     5.750 448.28 125.18
-    ## - unemp            1     1.951 444.48 125.44
-    ## <none>                         442.52 125.51
-    ## + hsgrad           1     0.704 441.82 126.81
-    ## + pop65:region     3     3.997 438.53 127.53
-    ## - poverty:region   3     9.785 452.31 129.11
-    ## - pop18            1    11.617 454.14 134.89
-    ## - pop_den          1    13.632 456.16 136.83
-    ## - state           44   127.320 569.84 148.52
-    ## - pbeds            1    33.728 476.25 155.76
+    ## - pop65            1     0.045 569.78 148.47
+    ## - hsgrad           1     0.107 569.84 148.52
+    ## - unemp            1     2.345 572.08 150.24
+    ## <none>                         569.74 150.44
+    ## + pop65:region     3     3.169 566.57 153.99
+    ## - pop_den          1     7.363 577.10 154.07
+    ## - pcincome:region  3    14.316 584.05 155.33
+    ## - poverty:region   3    18.180 587.92 158.23
+    ## - pop18            1    17.207 586.95 161.50
+    ## - pbeds            1    31.881 601.62 172.34
     ## 
-    ## Step:  AIC=124.55
-    ## sqrt_CRM_1000 ~ state + pop18 + poverty + unemp + pcincome + 
+    ## Step:  AIC=148.47
+    ## sqrt_CRM_1000 ~ pop18 + hsgrad + poverty + unemp + pcincome + 
     ##     region + pop_den + pbeds + poverty:region + pcincome:region
     ## 
     ##                   Df Sum of Sq    RSS    AIC
-    ## - pcincome:region  3     5.812 449.38 124.26
-    ## <none>                         443.57 124.55
-    ## - unemp            1     2.057 445.63 124.58
-    ## + pop65            1     1.046 442.52 125.51
-    ## + hsgrad           1     0.530 443.04 126.02
-    ## - poverty:region   3     9.617 453.19 127.96
-    ## - pop_den          1    13.034 456.61 135.26
-    ## - state           44   126.327 569.90 146.56
-    ## - pop18            1    25.495 469.07 147.08
-    ## - pbeds            1    33.401 476.97 154.42
+    ## - hsgrad           1     0.115 569.90 146.56
+    ## - unemp            1     2.428 572.21 148.34
+    ## <none>                         569.78 148.47
+    ## + pop65            1     0.045 569.74 150.44
+    ## - pop_den          1     7.490 577.27 152.21
+    ## - pcincome:region  3    14.280 584.06 153.34
+    ## - poverty:region   3    18.329 588.11 156.37
+    ## - pop18            1    24.342 594.13 164.84
+    ## - pbeds            1    36.617 606.40 173.81
     ## 
-    ## Step:  AIC=124.26
-    ## sqrt_CRM_1000 ~ state + pop18 + poverty + unemp + pcincome + 
-    ##     region + pop_den + pbeds + poverty:region
+    ## Step:  AIC=146.56
+    ## sqrt_CRM_1000 ~ pop18 + poverty + unemp + pcincome + region + 
+    ##     pop_den + pbeds + poverty:region + pcincome:region
     ## 
     ##                   Df Sum of Sq    RSS    AIC
-    ## <none>                         449.38 124.26
-    ## - unemp            1     2.145 451.53 124.35
-    ## + pcincome:region  3     5.812 443.57 124.55
-    ## + pop65            1     1.108 448.28 125.18
-    ## - poverty:region   3     7.630 457.01 125.65
-    ## + hsgrad           1     0.224 449.16 126.04
-    ## - pop_den          1    12.016 461.40 133.85
-    ## - pcincome         1    19.434 468.82 140.85
-    ## - pop18            1    25.247 474.63 146.26
-    ## - state           44   134.735 584.12 151.38
-    ## - pbeds            1    35.779 485.16 155.89
+    ## <none>                         569.90 146.56
+    ## - unemp            1     3.073 572.97 146.92
+    ## + hsgrad           1     0.115 569.78 148.47
+    ## + pop65            1     0.053 569.84 148.52
+    ## - pop_den          1     8.337 578.23 150.94
+    ## - pcincome:region  3    14.220 584.12 151.38
+    ## - poverty:region   3    18.214 588.11 154.37
+    ## - pop18            1    27.317 597.22 165.12
+    ## - pbeds            1    36.658 606.56 171.93
 
     ## 
     ## Call:
-    ## lm(formula = sqrt_CRM_1000 ~ state + pop18 + poverty + unemp + 
-    ##     pcincome + region + pop_den + pbeds + poverty:region, data = new_cdi)
+    ## lm(formula = sqrt_CRM_1000 ~ pop18 + poverty + unemp + pcincome + 
+    ##     region + pop_den + pbeds + poverty:region + pcincome:region, 
+    ##     data = new_cdi)
     ## 
     ## Coefficients:
-    ##                 (Intercept)                      stateAR  
-    ##                   1.772e+00                    1.088e+00  
-    ##                     stateAZ                      stateCA  
-    ##                   5.794e-01                   -1.228e-01  
-    ##                     stateCO                      stateCT  
-    ##                   5.356e-01                   -2.006e+00  
-    ##                     stateDC                      stateDE  
-    ##                  -5.713e-01                   -9.167e-02  
-    ##                     stateFL                      stateGA  
-    ##                   1.119e+00                    1.078e+00  
-    ##                     stateHI                      stateID  
-    ##                   9.970e-01                   -1.395e-01  
-    ##                     stateIL                      stateIN  
-    ##                  -1.354e+00                   -2.005e+00  
-    ##                     stateKS                      stateKY  
-    ##                   5.714e-01                   -6.745e-01  
-    ##                     stateLA                      stateMA  
-    ##                  -2.136e-02                   -2.448e+00  
-    ##                     stateMD                      stateME  
-    ##                  -1.029e-01                   -1.458e+00  
-    ##                     stateMI                      stateMN  
-    ##                  -8.206e-01                   -1.607e+00  
-    ##                     stateMO                      stateMS  
-    ##                  -1.274e+00                   -1.012e-01  
-    ##                     stateMT                      stateNC  
-    ##                  -1.648e+00                    4.089e-01  
-    ##                     stateND                      stateNE  
-    ##                  -2.833e+00                   -6.048e-01  
-    ##                     stateNH                      stateNJ  
-    ##                  -1.778e+00                   -1.252e+00  
-    ##                     stateNM                      stateNV  
-    ##                   8.154e-01                    1.030e+00  
-    ##                     stateNY                      stateOH  
-    ##                  -1.676e+00                   -2.035e+00  
-    ##                     stateOK                      stateOR  
-    ##                   9.304e-01                    6.128e-01  
-    ##                     statePA                      stateRI  
-    ##                  -2.424e+00                   -8.645e-01  
-    ##                     stateSC                      stateSD  
-    ##                   1.075e+00                   -1.626e+00  
-    ##                     stateTN                      stateTX  
-    ##                   1.583e-01                    1.040e+00  
-    ##                     stateUT                      stateVA  
-    ##                   3.849e-01                   -3.245e-01  
-    ##                     stateVT                      stateWA  
-    ##                  -2.143e+00                    5.043e-01  
-    ##                     stateWI                      stateWV  
-    ##                  -9.426e-01                   -9.192e-01  
-    ##                       pop18                      poverty  
-    ##                   7.178e-02                    1.366e-01  
-    ##                       unemp                     pcincome  
-    ##                   5.703e-02                    9.626e-05  
-    ##         regionNorth_Central                  regionSouth  
-    ##                          NA                           NA  
-    ##                  regionWest                      pop_den  
-    ##                          NA                    1.446e-04  
-    ##                       pbeds  poverty:regionNorth_Central  
-    ##                   2.093e+02                    4.359e-02  
-    ##         poverty:regionSouth           poverty:regionWest  
-    ##                  -5.625e-02                   -3.729e-02
+    ##                  (Intercept)                         pop18  
+    ##                   -1.959e-01                     6.579e-02  
+    ##                      poverty                         unemp  
+    ##                    1.395e-01                     5.046e-02  
+    ##                     pcincome           regionNorth_Central  
+    ##                    1.163e-04                    -1.907e+00  
+    ##                  regionSouth                    regionWest  
+    ##                    3.016e+00                     4.231e+00  
+    ##                      pop_den                         pbeds  
+    ##                    1.112e-04                     1.870e+02  
+    ##  poverty:regionNorth_Central           poverty:regionSouth  
+    ##                    1.027e-01                    -5.264e-02  
+    ##           poverty:regionWest  pcincome:regionNorth_Central  
+    ##                   -8.552e-02                     1.067e-04  
+    ##         pcincome:regionSouth           pcincome:regionWest  
+    ##                   -3.133e-05                    -9.168e-05
 
 ``` r
-multi_fit_both = lm(sqrt_CRM_1000 ~ state + pop18 + poverty + unemp + pcincome + region + pop_den + pbeds + poverty * region, data = new_cdi)
+multi_fit_both = lm(sqrt_CRM_1000 ~ pop18 + poverty + unemp + pcincome + region + pop_den + pbeds + poverty * region + pcincome * region, data = new_cdi)
 summary(multi_fit_both)
 ```
 
     ## 
     ## Call:
-    ## lm(formula = sqrt_CRM_1000 ~ state + pop18 + poverty + unemp + 
-    ##     pcincome + region + pop_den + pbeds + poverty * region, data = new_cdi)
+    ## lm(formula = sqrt_CRM_1000 ~ pop18 + poverty + unemp + pcincome + 
+    ##     region + pop_den + pbeds + poverty * region + pcincome * 
+    ##     region, data = new_cdi)
     ## 
     ## Residuals:
     ##     Min      1Q  Median      3Q     Max 
-    ## -3.7689 -0.6149  0.0000  0.7061  3.3473 
+    ## -4.1887 -0.7003  0.0553  0.7049  3.9034 
     ## 
-    ## Coefficients: (3 not defined because of singularities)
-    ##                               Estimate Std. Error t value Pr(>|t|)    
-    ## (Intercept)                  1.772e+00  9.458e-01   1.874 0.061754 .  
-    ## stateAR                      1.088e+00  8.754e-01   1.243 0.214584    
-    ## stateAZ                      5.794e-01  8.288e-01   0.699 0.484889    
-    ## stateCA                     -1.228e-01  6.134e-01  -0.200 0.841462    
-    ## stateCO                      5.356e-01  6.872e-01   0.779 0.436232    
-    ## stateCT                     -2.006e+00  6.633e-01  -3.024 0.002665 ** 
-    ## stateDC                     -5.713e-01  1.226e+00  -0.466 0.641345    
-    ## stateDE                     -9.167e-02  9.495e-01  -0.097 0.923144    
-    ## stateFL                      1.119e+00  4.719e-01   2.371 0.018212 *  
-    ## stateGA                      1.078e+00  5.504e-01   1.959 0.050819 .  
-    ## stateHI                      9.970e-01  8.538e-01   1.168 0.243654    
-    ## stateID                     -1.395e-01  1.211e+00  -0.115 0.908343    
-    ## stateIL                     -1.354e+00  6.103e-01  -2.218 0.027130 *  
-    ## stateIN                     -2.005e+00  6.219e-01  -3.225 0.001370 ** 
-    ## stateKS                      5.714e-01  7.770e-01   0.735 0.462513    
-    ## stateKY                     -6.745e-01  7.529e-01  -0.896 0.370875    
-    ## stateLA                     -2.136e-02  5.559e-01  -0.038 0.969374    
-    ## stateMA                     -2.448e+00  6.791e-01  -3.604 0.000355 ***
-    ## stateMD                     -1.029e-01  5.690e-01  -0.181 0.856583    
-    ## stateME                     -1.458e+00  7.407e-01  -1.968 0.049783 *  
-    ## stateMI                     -8.206e-01  6.512e-01  -1.260 0.208379    
-    ## stateMN                     -1.607e+00  6.610e-01  -2.431 0.015531 *  
-    ## stateMO                     -1.274e+00  6.731e-01  -1.892 0.059202 .  
-    ## stateMS                     -1.012e-01  7.509e-01  -0.135 0.892814    
-    ## stateMT                     -1.648e+00  1.233e+00  -1.337 0.182101    
-    ## stateNC                      4.089e-01  4.903e-01   0.834 0.404867    
-    ## stateND                     -2.833e+00  1.214e+00  -2.333 0.020166 *  
-    ## stateNE                     -6.048e-01  8.176e-01  -0.740 0.459889    
-    ## stateNH                     -1.778e+00  7.533e-01  -2.360 0.018788 *  
-    ## stateNJ                     -1.252e+00  6.077e-01  -2.059 0.040136 *  
-    ## stateNM                      8.154e-01  1.090e+00   0.748 0.454907    
-    ## stateNV                      1.030e+00  9.380e-01   1.099 0.272643    
-    ## stateNY                     -1.676e+00  6.049e-01  -2.770 0.005879 ** 
-    ## stateOH                     -2.035e+00  6.154e-01  -3.308 0.001030 ** 
-    ## stateOK                      9.304e-01  6.829e-01   1.362 0.173867    
-    ## stateOR                      6.128e-01  7.160e-01   0.856 0.392572    
-    ## statePA                     -2.424e+00  5.965e-01  -4.063 5.88e-05 ***
-    ## stateRI                     -8.645e-01  8.264e-01  -1.046 0.296177    
-    ## stateSC                      1.075e+00  5.276e-01   2.037 0.042334 *  
-    ## stateSD                     -1.626e+00  1.200e+00  -1.355 0.176344    
-    ## stateTN                      1.583e-01  5.637e-01   0.281 0.778994    
-    ## stateTX                      1.040e+00  4.655e-01   2.233 0.026097 *  
-    ## stateUT                      3.849e-01  7.909e-01   0.487 0.626755    
-    ## stateVA                     -3.245e-01  5.815e-01  -0.558 0.577166    
-    ## stateVT                     -2.143e+00  1.208e+00  -1.774 0.076827 .  
-    ## stateWA                      5.043e-01  6.584e-01   0.766 0.444209    
-    ## stateWI                     -9.426e-01  6.220e-01  -1.515 0.130481    
-    ## stateWV                     -9.192e-01  1.164e+00  -0.790 0.430001    
-    ## pop18                        7.178e-02  1.550e-02   4.633 4.96e-06 ***
-    ## poverty                      1.366e-01  4.836e-02   2.824 0.004991 ** 
-    ## unemp                        5.703e-02  4.223e-02   1.350 0.177662    
-    ## pcincome                     9.626e-05  2.368e-05   4.065 5.85e-05 ***
-    ## regionNorth_Central                 NA         NA      NA       NA    
-    ## regionSouth                         NA         NA      NA       NA    
-    ## regionWest                          NA         NA      NA       NA    
-    ## pop_den                      1.446e-04  4.525e-05   3.196 0.001510 ** 
-    ## pbeds                        2.093e+02  3.795e+01   5.515 6.44e-08 ***
-    ## poverty:regionNorth_Central  4.359e-02  5.194e-02   0.839 0.401787    
-    ## poverty:regionSouth         -5.625e-02  4.556e-02  -1.235 0.217730    
-    ## poverty:regionWest          -3.729e-02  5.391e-02  -0.692 0.489612    
+    ## Coefficients:
+    ##                                Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)                  -1.959e-01  1.164e+00  -0.168  0.86646    
+    ## pop18                         6.579e-02  1.461e-02   4.503 8.68e-06 ***
+    ## poverty                       1.395e-01  5.467e-02   2.551  0.01109 *  
+    ## unemp                         5.046e-02  3.341e-02   1.510  0.13171    
+    ## pcincome                      1.163e-04  3.527e-05   3.297  0.00106 ** 
+    ## regionNorth_Central          -1.907e+00  1.411e+00  -1.352  0.17718    
+    ## regionSouth                   3.016e+00  1.152e+00   2.619  0.00913 ** 
+    ## regionWest                    4.231e+00  1.393e+00   3.037  0.00253 ** 
+    ## pop_den                       1.112e-04  4.471e-05   2.488  0.01325 *  
+    ## pbeds                         1.870e+02  3.586e+01   5.216 2.87e-07 ***
+    ## poverty:regionNorth_Central   1.027e-01  6.350e-02   1.617  0.10660    
+    ## poverty:regionSouth          -5.264e-02  5.561e-02  -0.946  0.34443    
+    ## poverty:regionWest           -8.552e-02  6.722e-02  -1.272  0.20398    
+    ## pcincome:regionNorth_Central  1.067e-04  5.777e-05   1.847  0.06540 .  
+    ## pcincome:regionSouth         -3.133e-05  4.455e-05  -0.703  0.48228    
+    ## pcincome:regionWest          -9.168e-05  5.156e-05  -1.778  0.07609 .  
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
-    ## Residual standard error: 1.085 on 382 degrees of freedom
-    ## Multiple R-squared:  0.6342, Adjusted R-squared:  0.5806 
-    ## F-statistic: 11.83 on 56 and 382 DF,  p-value: < 2.2e-16
+    ## Residual standard error: 1.161 on 423 degrees of freedom
+    ## Multiple R-squared:  0.5362, Adjusted R-squared:  0.5197 
+    ## F-statistic:  32.6 on 15 and 423 DF,  p-value: < 2.2e-16
 
 ``` r
-# our Adjusted R-squared is 0.5806 and AIC=124.26
-```
-
-# Diagnostic Plots for Both Selection 一样的？？
-
-``` r
-par(mfrow=c(2,2))
-plot(multi_fit_both)
-```
-
-    ## Warning: not plotting observations with leverage one:
-    ##   72, 231, 338, 355, 387, 428
-
-    ## Warning in sqrt(crit * p * (1 - hh)/hh): NaNs produced
-
-    ## Warning in sqrt(crit * p * (1 - hh)/hh): NaNs produced
-
-![](data_exploration_files/figure-gfm/unnamed-chunk-24-1.png)<!-- -->
-
-``` r
-#```{r}
-##Step 1:  Fit simple linear regressions for all variables,look for the variable with lowest p-value
-#fit1 = lm(sqrt_CRM_1000 ~ state, data = new_cdi)
-#summary(fit1) 
-#fit2 = lm(sqrt_CRM_1000 ~ region, data = new_cdi)
-#summary(fit2) 
-#fit3 = lm(sqrt_CRM_1000 ~ totalinc, data = new_cdi)
-#summary(fit3) 
-#fit4 = lm(sqrt_CRM_1000 ~ pop18, data = new_cdi)
-#summary(fit4)
-#fit5 = lm(sqrt_CRM_1000 ~ pop65, data = new_cdi)
-#summary(fit5) 
-#fit6 = lm(sqrt_CRM_1000 ~ pdocs, data = new_cdi)
-#summary(fit6) 
-#fit7 = lm(sqrt_CRM_1000 ~ pbeds, data = new_cdi)
-#summary(fit7) 
-#fit8 = lm(sqrt_CRM_1000 ~ bagrad, data = new_cdi)
-#summary(fit8) 
-#fit9 = lm(sqrt_CRM_1000 ~ poverty, data = new_cdi)
-#summary(fit9) 
-#fit10 = lm(sqrt_CRM_1000 ~ unemp, data = new_cdi)
-#summary(fit10) 
-#fit11 = lm(sqrt_CRM_1000 ~ pop_den, data = new_cdi)
-#summary(fit11) 
-#
-#
-#
-## Enter first the one with the lowest p-value: poverty
-#forward1 = lm(sqrt_CRM_1000 ~ poverty, data = new_cdi)
-#summary(forward1)
-#
-#### Step 2: Enter the one with the lowest p-value in the rest 
-#fit1 = update(forward1, . ~ . +state)
-#summary(fit1)
-#fit2 = update(forward1, . ~ . +region)
-#summary(fit2)
-#fit3 = update(forward1, . ~ . +totalinc)
-#summary(fit3)
-#fit4 = update(forward1, . ~ . +pop18)
-#summary(fit4)
-#fit5 = update(forward1, . ~ . +pop65)
-#summary(fit5)
-#fit6 = update(forward1, . ~ . +pdocs)
-#summary(fit6)
-#fit7 = update(forward1, . ~ . +pbeds)
-#summary(fit7)
-#fit8 = update(forward1, . ~ . +bagrad)
-#summary(fit8)
-#fit9 = update(forward1, . ~ . +unemp)
-#summary(fit9)
-#fit10 = update(forward1, . ~ . +pop_den)
-#summary(fit10) 
-#
-#
-#
-## Enter the one with the lowest p-value: beds
-#forward2 = update(forward1, . ~ . + beds)
-#summary(forward2)
-#
-#### Step 3: Enter the one with the lowest p-value in the rest 
-#fit1 = update(forward2, . ~ . +state)
-#summary(fit1)
-#fit2 = update(forward2, . ~ . +area)
-#summary(fit2)
-#fit3 = update(forward2, . ~ . +pop)
-#summary(fit3)
-#fit4 = update(forward2, . ~ . +pop18)
-#summary(fit4)
-#fit5 = update(forward2, . ~ . +pop65)
-#summary(fit5)
-#fit6 = update(forward2, . ~ . +docs)
-#summary(fit6)
-#fit7 = update(forward2, . ~ . +hsgrad)
-#summary(fit7)
-#fit8 = update(forward2, . ~ . +bagrad)
-#summary(fit8)
-#fit9 = update(forward2, . ~ . +unemp)
-#summary(fit9)
-#fit10 = update(forward2, . ~ . +pcincome)
-#summary(fit10)
-#fit11 = update(forward2, . ~ . +totalinc)
-#summary(fit11)
-#
-#
-## Enter the one with the lowest p-value: bagrad
-#forward3 = update(forward2, . ~ . + bagrad)
-#summary(forward3)
-#
-#### Step 4: Enter the one with the lowest p-value in the rest 
-#fit1 = update(forward2, . ~ . +state)
-#summary(fit1)
-#fit2 = update(forward2, . ~ . +area)
-#summary(fit2)
-#fit3 = update(forward2, . ~ . +pop)
-#summary(fit3)
-#fit4 = update(forward2, . ~ . +pop18)
-#summary(fit4)
-#fit5 = update(forward2, . ~ . +pop65)
-#summary(fit5)
-#fit6 = update(forward2, . ~ . +docs)
-#summary(fit6)
-#fit7 = update(forward2, . ~ . +hsgrad)
-#summary(fit7)
-#fit8 = update(forward2, . ~ . +unemp)
-#summary(fit8)
-#fit9 = update(forward2, . ~ . +pcincome)
-#summary(fit9)
-#fit10 = update(forward2, . ~ . +totalinc)
-#summary(fit10)
-#
-#
-## Enter the one with the lowest p-value: unemp
-#forward4 = update(forward3, . ~ . + unemp)
-#summary(forward4)
-#
-#
-#### Step 5: Enter the one with the lowest p-value in the rest 
-#fit1 = update(forward2, . ~ . +state)
-#summary(fit1)
-#fit2 = update(forward2, . ~ . +area)
-#summary(fit2)
-#fit3 = update(forward2, . ~ . +pop)
-#summary(fit3)
-#fit4 = update(forward2, . ~ . +pop18)
-#summary(fit4)
-#fit5 = update(forward2, . ~ . +pop65)
-#summary(fit5)
-#fit6 = update(forward2, . ~ . +docs)
-#summary(fit6)
-#fit7 = update(forward2, . ~ . +hsgrad)
-#summary(fit7)
-#fit8 = update(forward2, . ~ . +pcincome)
-#summary(fit8)
-#fit9 = update(forward2, . ~ . +totalinc)
-#summary(fit9)
-#
-## Enter the one with the lowest p-value: pop18
-#
-#forward5 = update(forward4, . ~ . + pop18)
-#summary(forward5)
+# our Adjusted R-squared is 0.5197 and AIC=146.56
 ```
 
 Test based procedure
@@ -2190,89 +1420,81 @@ Test based procedure
 ``` r
 cdi_test = 
   new_cdi %>% 
-  mutate(state = as.numeric(state),
-         region = as.numeric(region))
+  mutate(region = as.numeric(region))
 
 mat = as.matrix(cdi_test)
 # Printing the 2 best models of each size, using the Cp criterion:
-leaps(x = mat[,2:11], y = mat[,1], nbest = 2, method = "Cp")
+leaps(x = mat[,2:10], y = mat[,1], nbest = 2, method = "Cp")
 ```
 
     ## $which
-    ##        1     2     3     4     5     6     7     8     9     A
-    ## 1  FALSE FALSE FALSE FALSE  TRUE FALSE FALSE FALSE FALSE FALSE
-    ## 1  FALSE FALSE FALSE FALSE FALSE FALSE FALSE  TRUE FALSE FALSE
-    ## 2  FALSE FALSE FALSE FALSE FALSE FALSE FALSE  TRUE FALSE  TRUE
-    ## 2  FALSE FALSE FALSE FALSE  TRUE FALSE FALSE  TRUE FALSE FALSE
-    ## 3  FALSE FALSE FALSE FALSE FALSE FALSE FALSE  TRUE  TRUE  TRUE
-    ## 3  FALSE FALSE FALSE FALSE  TRUE FALSE FALSE  TRUE FALSE  TRUE
-    ## 4  FALSE FALSE FALSE FALSE  TRUE FALSE FALSE  TRUE  TRUE  TRUE
-    ## 4  FALSE FALSE FALSE FALSE  TRUE FALSE  TRUE  TRUE FALSE  TRUE
-    ## 5  FALSE  TRUE FALSE FALSE  TRUE FALSE  TRUE  TRUE FALSE  TRUE
-    ## 5  FALSE  TRUE FALSE FALSE  TRUE FALSE FALSE  TRUE  TRUE  TRUE
-    ## 6  FALSE  TRUE FALSE FALSE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE
-    ## 6  FALSE  TRUE FALSE  TRUE  TRUE FALSE  TRUE  TRUE FALSE  TRUE
-    ## 7  FALSE  TRUE FALSE  TRUE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE
-    ## 7  FALSE  TRUE  TRUE FALSE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE
-    ## 8   TRUE  TRUE FALSE  TRUE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE
-    ## 8  FALSE  TRUE  TRUE  TRUE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE
-    ## 9   TRUE  TRUE  TRUE  TRUE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE
-    ## 9   TRUE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE
-    ## 10  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE
+    ##       1     2     3     4     5     6     7     8     9
+    ## 1 FALSE FALSE FALSE  TRUE FALSE FALSE FALSE FALSE FALSE
+    ## 1 FALSE FALSE FALSE FALSE FALSE FALSE  TRUE FALSE FALSE
+    ## 2 FALSE FALSE FALSE FALSE FALSE FALSE  TRUE FALSE  TRUE
+    ## 2 FALSE FALSE FALSE  TRUE FALSE FALSE  TRUE FALSE FALSE
+    ## 3 FALSE FALSE FALSE FALSE FALSE FALSE  TRUE  TRUE  TRUE
+    ## 3 FALSE FALSE FALSE  TRUE FALSE FALSE  TRUE FALSE  TRUE
+    ## 4 FALSE FALSE FALSE  TRUE FALSE FALSE  TRUE  TRUE  TRUE
+    ## 4 FALSE FALSE FALSE  TRUE FALSE  TRUE  TRUE FALSE  TRUE
+    ## 5  TRUE FALSE FALSE  TRUE FALSE  TRUE  TRUE FALSE  TRUE
+    ## 5  TRUE FALSE FALSE  TRUE FALSE FALSE  TRUE  TRUE  TRUE
+    ## 6  TRUE FALSE FALSE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE
+    ## 6  TRUE FALSE  TRUE  TRUE FALSE  TRUE  TRUE FALSE  TRUE
+    ## 7  TRUE FALSE  TRUE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE
+    ## 7  TRUE  TRUE FALSE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE
+    ## 8  TRUE  TRUE  TRUE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE
+    ## 8  TRUE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE
+    ## 9  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE
     ## 
     ## $label
     ##  [1] "(Intercept)" "1"           "2"           "3"           "4"          
     ##  [6] "5"           "6"           "7"           "8"           "9"          
-    ## [11] "A"          
     ## 
     ## $size
-    ##  [1]  2  2  3  3  4  4  5  5  6  6  7  7  8  8  9  9 10 10 11
+    ##  [1]  2  2  3  3  4  4  5  5  6  6  7  7  8  8  9  9 10
     ## 
     ## $Cp
-    ##  [1] 231.248849 242.075171  95.281421 144.759370  59.727388  69.339829
-    ##  [7]  32.742775  34.434026  11.929695  20.345930   5.239230  10.193026
-    ## [13]   5.451604   6.923779   7.218521   7.325918   9.010215   9.201080
-    ## [19]  11.000000
+    ##  [1] 232.299940 243.143342  96.114852 145.670858  60.501572  70.129178
+    ##  [7]  33.471233  35.165152  12.622162  21.051674   5.917987  10.879598
+    ## [13]   6.127540   7.602038   8.001656   8.127540  10.000000
 
 ``` r
 # Printing the 2 best models of each size, using the adjusted R^2 criterion:
-leaps(x = mat[,2:11], y = mat[,1], nbest = 2, method = "adjr2")
+leaps(x = mat[,2:10], y = mat[,1], nbest = 2, method = "adjr2")
 ```
 
     ## $which
-    ##        1     2     3     4     5     6     7     8     9     A
-    ## 1  FALSE FALSE FALSE FALSE  TRUE FALSE FALSE FALSE FALSE FALSE
-    ## 1  FALSE FALSE FALSE FALSE FALSE FALSE FALSE  TRUE FALSE FALSE
-    ## 2  FALSE FALSE FALSE FALSE FALSE FALSE FALSE  TRUE FALSE  TRUE
-    ## 2  FALSE FALSE FALSE FALSE  TRUE FALSE FALSE  TRUE FALSE FALSE
-    ## 3  FALSE FALSE FALSE FALSE FALSE FALSE FALSE  TRUE  TRUE  TRUE
-    ## 3  FALSE FALSE FALSE FALSE  TRUE FALSE FALSE  TRUE FALSE  TRUE
-    ## 4  FALSE FALSE FALSE FALSE  TRUE FALSE FALSE  TRUE  TRUE  TRUE
-    ## 4  FALSE FALSE FALSE FALSE  TRUE FALSE  TRUE  TRUE FALSE  TRUE
-    ## 5  FALSE  TRUE FALSE FALSE  TRUE FALSE  TRUE  TRUE FALSE  TRUE
-    ## 5  FALSE  TRUE FALSE FALSE  TRUE FALSE FALSE  TRUE  TRUE  TRUE
-    ## 6  FALSE  TRUE FALSE FALSE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE
-    ## 6  FALSE  TRUE FALSE  TRUE  TRUE FALSE  TRUE  TRUE FALSE  TRUE
-    ## 7  FALSE  TRUE FALSE  TRUE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE
-    ## 7  FALSE  TRUE  TRUE FALSE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE
-    ## 8   TRUE  TRUE FALSE  TRUE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE
-    ## 8  FALSE  TRUE  TRUE  TRUE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE
-    ## 9   TRUE  TRUE  TRUE  TRUE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE
-    ## 9   TRUE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE
-    ## 10  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE
+    ##       1     2     3     4     5     6     7     8     9
+    ## 1 FALSE FALSE FALSE  TRUE FALSE FALSE FALSE FALSE FALSE
+    ## 1 FALSE FALSE FALSE FALSE FALSE FALSE  TRUE FALSE FALSE
+    ## 2 FALSE FALSE FALSE FALSE FALSE FALSE  TRUE FALSE  TRUE
+    ## 2 FALSE FALSE FALSE  TRUE FALSE FALSE  TRUE FALSE FALSE
+    ## 3 FALSE FALSE FALSE FALSE FALSE FALSE  TRUE  TRUE  TRUE
+    ## 3 FALSE FALSE FALSE  TRUE FALSE FALSE  TRUE FALSE  TRUE
+    ## 4 FALSE FALSE FALSE  TRUE FALSE FALSE  TRUE  TRUE  TRUE
+    ## 4 FALSE FALSE FALSE  TRUE FALSE  TRUE  TRUE FALSE  TRUE
+    ## 5  TRUE FALSE FALSE  TRUE FALSE  TRUE  TRUE FALSE  TRUE
+    ## 5  TRUE FALSE FALSE  TRUE FALSE FALSE  TRUE  TRUE  TRUE
+    ## 6  TRUE FALSE FALSE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE
+    ## 6  TRUE FALSE  TRUE  TRUE FALSE  TRUE  TRUE FALSE  TRUE
+    ## 7  TRUE FALSE  TRUE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE
+    ## 7  TRUE  TRUE FALSE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE
+    ## 8  TRUE  TRUE  TRUE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE
+    ## 8  TRUE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE
+    ## 9  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE
     ## 
     ## $label
     ##  [1] "(Intercept)" "1"           "2"           "3"           "4"          
     ##  [6] "5"           "6"           "7"           "8"           "9"          
-    ## [11] "A"          
     ## 
     ## $size
-    ##  [1]  2  2  3  3  4  4  5  5  6  6  7  7  8  8  9  9 10 10 11
+    ##  [1]  2  2  3  3  4  4  5  5  6  6  7  7  8  8  9  9 10
     ## 
     ## $adjr2
     ##  [1] 0.2038944 0.1909580 0.3673049 0.3080477 0.4109303 0.3993915 0.4444463
     ##  [8] 0.4424115 0.4706747 0.4605251 0.4799538 0.4739660 0.4809130 0.4791294
-    ## [15] 0.4799889 0.4798585 0.4790303 0.4787980 0.4778255
+    ## [15] 0.4798585 0.4797058 0.4786480
 
 ``` r
 # Function regsubsets() performs a subset selection by identifying the "best" model that contains
@@ -2289,7 +1511,7 @@ abline(0,1)
 plot(2:9, rs$adjr2, xlab = "No of parameters", ylab = "Adj R2")
 ```
 
-![](data_exploration_files/figure-gfm/unnamed-chunk-26-1.png)<!-- -->
+![](data_exploration_files/figure-gfm/unnamed-chunk-21-1.png)<!-- -->
 
 ``` r
 multi_fit_test = lm(sqrt_CRM_1000 ~ pop18 + hsgrad + poverty + pcincome + region + pop_den + pbeds + poverty * region, data = cdi_test)
@@ -2323,11 +1545,53 @@ summary(multi_fit_test)
     ## Multiple R-squared:  0.4925, Adjusted R-squared:  0.483 
     ## F-statistic: 52.16 on 8 and 430 DF,  p-value: < 2.2e-16
 
-# Diagnostic Plots for Test based procedure
+``` r
+#adjusted r squared = 0.483
+```
+
+## Model diagnostics
+
+Diagnostic Plots for Backward Elimination 1
 
 ``` r
-par(mfrow=c(2,2))
+par(mfrow = c(2,2))
+plot(multi_fit_back1)
+```
+
+![](data_exploration_files/figure-gfm/unnamed-chunk-22-1.png)<!-- -->
+
+Diagnostic Plots for Backward Elimination 2
+
+``` r
+par(mfrow = c(2,2))
+plot(multi_fit_back2)
+```
+
+![](data_exploration_files/figure-gfm/unnamed-chunk-23-1.png)<!-- -->
+
+Diagnostic Plots for Forward Selection
+
+``` r
+par(mfrow = c(2,2))
+plot(multi_fit_forward)
+```
+
+![](data_exploration_files/figure-gfm/unnamed-chunk-24-1.png)<!-- -->
+
+Diagnostic Plots for Both Selection
+
+``` r
+par(mfrow = c(2,2))
+plot(multi_fit_both)
+```
+
+![](data_exploration_files/figure-gfm/unnamed-chunk-25-1.png)<!-- -->
+
+Diagnostic Plots for Test based procedure
+
+``` r
+par(mfrow = c(2,2))
 plot(multi_fit_test)
 ```
 
-![](data_exploration_files/figure-gfm/unnamed-chunk-27-1.png)<!-- -->
+![](data_exploration_files/figure-gfm/unnamed-chunk-26-1.png)<!-- -->

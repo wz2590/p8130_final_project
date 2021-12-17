@@ -1,7 +1,6 @@
 ---
-title: "data_exploration"
-author: "Weiheng Zhang"
-date: "2021/11/28"
+title: "P8130 Final Project"
+authors: Weiheng Zhang, Lin Yang, Yihan Qiu, Fei Sun, Zhuolun Huang
 output: github_document
 ---
 
@@ -15,8 +14,6 @@ library(MASS)
 library(performance)
 library(leaps)
 library(glmnet)
-
-
 
 theme_set(theme_minimal() + theme(legend.position = "bottom"))
 
@@ -57,12 +54,11 @@ summary(cdi)
 
 ```{r}
 sapply(cdi, function(x) sum(is.na(x)))
-
-map(cdi, ~sum(is.na(.)))
 ```
 No missing values were found.
 
-Boxplot for each variable
+
+Boxplots for each variable
 ```{r, dpi = 300}
 par(mfrow = c(2, 3))
 boxplot(cdi$CRM_1000, main = 'Crime Rate per 1000 people') # an obvious outlier around 300
@@ -92,7 +88,7 @@ cdi %>% ggplot(aes(x = pop18, y = CRM_1000)) + geom_point(alpha = 0.3) + geom_sm
 cdi %>% ggplot(aes(x = pop65, y = CRM_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
 cdi %>% ggplot(aes(x = pdocs, y = CRM_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
 cdi %>% ggplot(aes(x = pbeds, y = CRM_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
-cdi %>% ggplot(aes(x = hsgrad, y = CRM_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red') #negative correlation
+cdi %>% ggplot(aes(x = hsgrad, y = CRM_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red') # negative correlation
 cdi %>% ggplot(aes(x = bagrad, y = CRM_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
 cdi %>% ggplot(aes(x = poverty, y = CRM_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red') # positive correlation
 cdi %>% ggplot(aes(x = unemp, y = CRM_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
@@ -100,6 +96,8 @@ cdi %>% ggplot(aes(x = pcincome, y = CRM_1000)) + geom_point(alpha = 0.3) + geom
 cdi %>% ggplot(aes(x = totalinc, y = CRM_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
 cdi %>% ggplot(aes(x = region, y = CRM_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red')
 ```
+
+
 
 ## Identify counties with unusual crime rates.
 ```{r}
@@ -143,7 +141,7 @@ cdi_state %>%
 boxplot(cdi_state$state_CRM_1000, main = 'State Crime Rate per 1000 people')
 ```
   
-Surprisingly, if we look at the CRM_1000 at state level, no outlier was found.
+Surprisingly, if we look at the CRM_1000 at state level, no outliers were found.
 
 
 ## Remove Unnecessary Variables
@@ -155,10 +153,9 @@ cdi =
 ```
 
 
-## Checking to Outliers and Influential Points
+## Check for Outliers and Influential Points
 
 ```{r}
-
 mult.fit1 = lm(CRM_1000 ~ ., data = cdi) 
 
 # residuals vs leverage plot
@@ -182,17 +179,16 @@ summary(with); summary(without) ##compare p values and r squared
 
 ## Check for transformation
 
-```{r}
-# fit multivariate model
+```{r, dpi = 300}
 mult.fit1 = lm(CRM_1000 ~ ., data = cdiout) 
 summary(mult.fit1)
 
 boxcox(mult.fit1)
 ```
 
-a is close to 1/2. Perform sqrt transformation.
+Perform square root transformation because a is close to 1/2.
 
-```{r}
+```{r, dpi = 300}
 cdi_sqrt = 
   cdiout %>% 
   mutate(sqrt_CRM_1000 = sqrt(CRM_1000)) %>% 
@@ -275,7 +271,7 @@ summary(step4)
 
 multi_fit_back1 = lm(sqrt_CRM_1000 ~ pop18 + poverty + pop_den + pbeds + poverty * region, data = new_cdi)
 summary(multi_fit_back1)
-# multi_fit_back1: adjusted r squared is 0.4477 
+# multi_fit_back1: adjusted r squared is 0.4886
 
 # just use one function for backward 
 step(mult.fit_inter, direction = 'backward')
@@ -305,7 +301,7 @@ summary(multi_fit_both)
 ```
 
 Test based procedure
-```{r}
+```{r, dpi = 300}
 cdi_test = 
   new_cdi %>% 
   mutate(region = as.numeric(region))
@@ -374,7 +370,7 @@ plot(multi_fit_test)
 ```
 
 
-## Comparing models from 3 approaches
+## Create a table comparing models
 ```{r}
 stargazer::stargazer(multi_fit_back2, multi_fit_forward, multi_fit_test, type = "text", out = "table1.txt")
 ```

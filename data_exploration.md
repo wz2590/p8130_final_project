@@ -1,7 +1,5 @@
-data\_exploration
+P8130 Final Project
 ================
-Weiheng Zhang
-2021/11/28
 
 ## Data cleaning
 
@@ -97,64 +95,9 @@ sapply(cdi, function(x) sum(is.na(x)))
     ##    pbeds 
     ##        0
 
-``` r
-map(cdi, ~sum(is.na(.)))
-```
-
-    ## $CRM_1000
-    ## [1] 0
-    ## 
-    ## $cty
-    ## [1] 0
-    ## 
-    ## $state
-    ## [1] 0
-    ## 
-    ## $pop
-    ## [1] 0
-    ## 
-    ## $pop18
-    ## [1] 0
-    ## 
-    ## $pop65
-    ## [1] 0
-    ## 
-    ## $crimes
-    ## [1] 0
-    ## 
-    ## $hsgrad
-    ## [1] 0
-    ## 
-    ## $bagrad
-    ## [1] 0
-    ## 
-    ## $poverty
-    ## [1] 0
-    ## 
-    ## $unemp
-    ## [1] 0
-    ## 
-    ## $pcincome
-    ## [1] 0
-    ## 
-    ## $totalinc
-    ## [1] 0
-    ## 
-    ## $region
-    ## [1] 0
-    ## 
-    ## $pop_den
-    ## [1] 0
-    ## 
-    ## $pdocs
-    ## [1] 0
-    ## 
-    ## $pbeds
-    ## [1] 0
-
 No missing values were found.
 
-Boxplot for each variable
+Boxplots for each variable
 
 ``` r
 par(mfrow = c(2, 3))
@@ -213,7 +156,7 @@ cdi %>% ggplot(aes(x = pbeds, y = CRM_1000)) + geom_point(alpha = 0.3) + geom_sm
 ![](data_exploration_files/figure-gfm/unnamed-chunk-7-5.png)<!-- -->
 
 ``` r
-cdi %>% ggplot(aes(x = hsgrad, y = CRM_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red') #negative correlation
+cdi %>% ggplot(aes(x = hsgrad, y = CRM_1000)) + geom_point(alpha = 0.3) + geom_smooth(method = 'lm', se = TRUE, color = 'red') # negative correlation
 ```
 
 ![](data_exploration_files/figure-gfm/unnamed-chunk-7-6.png)<!-- -->
@@ -325,8 +268,8 @@ boxplot(cdi_state$state_CRM_1000, main = 'State Crime Rate per 1000 people')
 
 ![](data_exploration_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
 
-Surprisingly, if we look at the CRM\_1000 at state level, no outlier was
-found.
+Surprisingly, if we look at the CRM\_1000 at state level, no outliers
+were found.
 
 ## Remove Unnecessary Variables
 
@@ -336,7 +279,7 @@ cdi =
   dplyr::select(-pop, -crimes, -cty)
 ```
 
-## Checking to Outliers and Influential Points
+## Check for Outliers and Influential Points
 
 ``` r
 mult.fit1 = lm(CRM_1000 ~ ., data = cdi) 
@@ -533,7 +476,6 @@ summary(with); summary(without) ##compare p values and r squared
 ## Check for transformation
 
 ``` r
-# fit multivariate model
 mult.fit1 = lm(CRM_1000 ~ ., data = cdiout) 
 summary(mult.fit1)
 ```
@@ -623,7 +565,7 @@ boxcox(mult.fit1)
 
 ![](data_exploration_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
 
-a is close to 1/2. Perform sqrt transformation.
+Perform square root transformation because a is close to 1/2.
 
 ``` r
 cdi_sqrt = 
@@ -1061,7 +1003,7 @@ summary(multi_fit_back1)
     ## F-statistic: 42.84 on 10 and 428 DF,  p-value: < 2.2e-16
 
 ``` r
-# multi_fit_back1: adjusted r squared is 0.4477 
+# multi_fit_back1: adjusted r squared is 0.4886
 
 # just use one function for backward 
 step(mult.fit_inter, direction = 'backward')
@@ -1596,7 +1538,7 @@ plot(multi_fit_test)
 
 ![](data_exploration_files/figure-gfm/unnamed-chunk-26-1.png)<!-- -->
 
-## Comparing models from 3 approaches
+## Create a table comparing models
 
 ``` r
 stargazer::stargazer(multi_fit_back2, multi_fit_forward, multi_fit_test, type = "text", out = "table1.txt")
